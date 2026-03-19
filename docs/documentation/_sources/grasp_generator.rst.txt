@@ -1,0 +1,7 @@
+grasp_generator
+===============
+
+.. automodule:: pybullet_grasper.grasp_generator
+   :members:
+   :undoc-members:
+   :show-inheritance:

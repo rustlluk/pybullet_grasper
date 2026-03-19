@@ -1,0 +1,3 @@
+<launch>
+    <node name="grasp_generator_service_node" pkg="pybullet_grasper" type="grasp_generator_service.py" respawn="true" output="screen"/>
+</launch>

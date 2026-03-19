@@ -1,0 +1,283 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>visualization &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/jquery.js?v=5d32c60e"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/https://rustlluk.github.io/pybullet_grasper/documentation/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/doctools.js?v=888ff710"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="utils" href="utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Grasping with PyBullet</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html#pybullet-grasper">pybullet_grasper</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bullet_classes.html">bullet_classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp.html">grasp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html">grasp_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator_service.html">grasp_generator_service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasper_main.html">grasper_main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer"><code class="docutils literal notranslate"><span class="pre">Visualizer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer.KeyCallback"><code class="docutils literal notranslate"><span class="pre">Visualizer.KeyCallback</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer.OnCloseGWS"><code class="docutils literal notranslate"><span class="pre">Visualizer.OnCloseGWS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer.draw_force_torques"><code class="docutils literal notranslate"><span class="pre">Visualizer.draw_force_torques()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer.draw_gws"><code class="docutils literal notranslate"><span class="pre">Visualizer.draw_gws()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer.draw_normal_forces"><code class="docutils literal notranslate"><span class="pre">Visualizer.draw_normal_forces()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer.render"><code class="docutils literal notranslate"><span class="pre">Visualizer.render()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer.save_image"><code class="docutils literal notranslate"><span class="pre">Visualizer.save_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer.show_mesh"><code class="docutils literal notranslate"><span class="pre">Visualizer.show_mesh()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Grasping with PyBullet</a></li>
+      <li class="breadcrumb-item active">visualization</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="https://rustlluk.github.io/pybullet_grasper/documentation/_sources/visualization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pybullet_grasper.visualization">
+<span id="visualization"></span><h1>visualization<a class="headerlink" href="#module-pybullet_grasper.visualization" title="Permalink to this heading"></a></h1>
+<p>Visualzation class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lukas Rustler</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.visualization.</span></span><span class="sig-name descname"><span class="pre">Visualizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to help with custom rendering</p>
+<p>Initializes Open3D-based visualization utilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> (<em>Any</em><em>, </em><em>optional</em><em>, </em><em>default=None</em>) – active simulation client used to query geometry states</p></li>
+<li><p><strong>visible</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default=0</em>) – 1 to show UI window, 0 for headless render loop</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer.KeyCallback">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KeyCallback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">menu_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer.KeyCallback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer.KeyCallback" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Help function to unify key callbacks for toggling thingies in the windows</p>
+<p>Init
+:param geom_type: name of geometric type: cone, object, gripper
+:type geom_type: str
+:param parent: pointer to the parent instance
+:type parent: Any
+:param menu_id: menu item identifier in Open3D menu
+:type menu_id: int
+:return: None
+:rtype: None</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer.OnCloseGWS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OnCloseGWS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gws_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybullet_grasper.visualization.Visualizer" title="pybullet_grasper.visualization.Visualizer"><span class="pre">Visualizer</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer.OnCloseGWS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer.OnCloseGWS" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Help class delete information about the given GWS window from visualizer</p>
+<p>Init
+:param gws_type: type of GWS, by default something like L1_fixed_force; used as key to dictionary
+:type gws_type: str
+:param parent: pointer to parent instance
+:type parent: Visualizer
+:return: None
+:rtype: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer.draw_force_torques">
+<span class="sig-name descname"><span class="pre">draw_force_torques</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">torques</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cone_vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnitudes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer.draw_force_torques"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer.draw_force_torques" title="Permalink to this definition"></a></dt>
+<dd><p>Draws friction cones and torque vectors for currently active contacts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<em>np.ndarray</em>) – contact point positions</p></li>
+<li><p><strong>forces</strong> (<em>np.ndarray</em>) – discretized friction cone forces</p></li>
+<li><p><strong>torques</strong> (<em>np.ndarray</em>) – corresponding torques for plotted forces</p></li>
+<li><p><strong>cone_vertices</strong> (<em>int</em>) – number of vertices per friction cone approximation</p></li>
+<li><p><strong>magnitudes</strong> (<em>np.ndarray</em>) – normal force magnitudes used for cone scaling</p></li>
+<li><p><strong>world_origin</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>, </em><em>0</em><em>, </em><em>0</em><em>]</em>) – origin offset applied to rendered vectors</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer.draw_gws">
+<span class="sig-name descname"><span class="pre">draw_gws</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer.draw_gws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer.draw_gws" title="Permalink to this definition"></a></dt>
+<dd><p>Opens per-hull windows with grasp wrench space meshes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer.draw_normal_forces">
+<span class="sig-name descname"><span class="pre">draw_normal_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer.draw_normal_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer.draw_normal_forces" title="Permalink to this definition"></a></dt>
+<dd><p>Draws line segments for contact normals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<em>np.ndarray</em>) – contact point positions</p></li>
+<li><p><strong>normals</strong> (<em>np.ndarray</em>) – normal vectors at contact points</p></li>
+<li><p><strong>world_origin</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>, </em><em>0</em><em>, </em><em>0</em><em>]</em>) – origin offset applied to rendered vectors</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer.render" title="Permalink to this definition"></a></dt>
+<dd><p>Interactive render
+:return: None
+:rtype: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer.save_image">
+<span class="sig-name descname"><span class="pre">save_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">im</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer.save_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer.save_image" title="Permalink to this definition"></a></dt>
+<dd><p>Stores the last rendered image from asynchronous Open3D callback.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>im</strong> (<em>Any</em>) – rendered image instance provided by Open3D</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.visualization.Visualizer.show_mesh">
+<span class="sig-name descname"><span class="pre">show_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/visualization.html#Visualizer.show_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.visualization.Visualizer.show_mesh" title="Permalink to this definition"></a></dt>
+<dd><p>Function to parse message with information to insert objects to window
+:param obj_type: which type of objects is being shown - gripper, object
+:type obj_type: str, optional, default=””
+:return: None
+:rtype: None</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="utils.html" class="btn btn-neutral float-left" title="utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

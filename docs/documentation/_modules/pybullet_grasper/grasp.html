@@ -1,0 +1,496 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybullet_grasper.grasp &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Grasping with PyBullet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html#pybullet-grasper">pybullet_grasper</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybullet_grasper.grasp</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybullet_grasper.grasp</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Main class for analytic metrics</span>
+
+<span class="sd">:Author: Lukas Rustler</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConvexHull</span><span class="p">,</span> <span class="n">HalfspaceIntersection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">DBSCAN</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">open3d</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">o3d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">linprog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">null_space</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+
+
+<div class="viewcode-block" id="Grasp"><a class="viewcode-back" href="../../grasp.html#pybullet_grasper.grasp.Grasp">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Grasp</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to encapsulate functions regarding grasp quality.</span>
+<span class="sd">    Based on: https://ieeexplore.ieee.org/document/1371616/ and https://ieeexplore.ieee.org/document/772531/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">by_key</span><span class="p">()[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span>
+    <span class="n">rgb_colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">to_rgb</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gws_meshes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hulls</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Grasp.get_contact_info"><a class="viewcode-back" href="../../grasp.html#pybullet_grasper.grasp.Grasp.get_contact_info">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_contact_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">torque_origin</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtain contact information and divide it into arrays</span>
+<span class="sd">        :param object_id: id of the grasped object</span>
+<span class="sd">        :type object_id: int</span>
+<span class="sd">        :return: contact points, contact normals, contact forces, mutual frictions</span>
+<span class="sd">        :rtype: tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None, np.ndarray | None]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get contact from PyBullet</span>
+        <span class="n">contacts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">object_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">contacts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="c1"># prepare lists</span>
+        <span class="n">normals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">forces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">frictions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># get normals, points, forces, lateral frictions</span>
+        <span class="k">for</span> <span class="n">contact_id</span><span class="p">,</span> <span class="n">contact</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">contacts</span><span class="p">):</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="n">contact</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">contactPoints</span><span class="p">[</span><span class="s2">&quot;FORCE&quot;</span><span class="p">]]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Force for contact </span><span class="si">{</span><span class="n">contact_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">force</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">force</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analytical</span><span class="o">.</span><span class="n">force_threshold</span><span class="p">:</span>  <span class="c1"># sometimes the force is too low -&gt; wrong contact</span>
+                <span class="n">normals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">contactPoints</span><span class="p">[</span><span class="s2">&quot;NORMAL&quot;</span><span class="p">]])</span>
+                <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">contactPoints</span><span class="p">[</span><span class="s2">&quot;POSITIONB&quot;</span><span class="p">]]</span><span class="o">-</span><span class="n">torque_origin</span><span class="p">)</span>
+                <span class="n">forces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
+
+                <span class="c1"># mutual friction = friction1*friction2</span>
+                <span class="n">friction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getDynamicsInfo</span><span class="p">(</span><span class="n">object_id</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">dynamicsInfo</span><span class="p">[</span><span class="s2">&quot;FRICTION&quot;</span><span class="p">]]</span> <span class="o">*</span> \
+                           <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getDynamicsInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">contact</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">contactPoints</span><span class="p">[</span><span class="s2">&quot;INDEXB&quot;</span><span class="p">]])[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">dynamicsInfo</span><span class="p">[</span><span class="s2">&quot;FRICTION&quot;</span><span class="p">]]</span>
+                <span class="n">frictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">friction</span><span class="p">)</span>
+
+        <span class="c1"># make them numpy</span>
+        <span class="n">normals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">normals</span><span class="p">)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">forces</span><span class="p">)</span>
+        <span class="n">frictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frictions</span><span class="p">)</span>
+
+        <span class="c1"># cluster points to get rid of some unwanted, e.g., close points with similar normal</span>
+        <span class="n">dbscan_angle</span> <span class="o">=</span> <span class="n">DBSCAN</span><span class="p">(</span><span class="n">min_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">normals</span><span class="p">)</span>
+        <span class="n">dbscan_distance</span> <span class="o">=</span> <span class="n">DBSCAN</span><span class="p">(</span><span class="n">min_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+        <span class="n">final_indexes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">dbscan_distance</span><span class="o">.</span><span class="n">labels_</span><span class="p">):</span>
+            <span class="n">temp_idx</span> <span class="o">=</span> <span class="n">dbscan_distance</span><span class="o">.</span><span class="n">labels_</span> <span class="o">==</span> <span class="n">cl</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dbscan_angle</span><span class="o">.</span><span class="n">labels_</span><span class="p">[</span><span class="n">temp_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">dbscan_angle</span><span class="o">.</span><span class="n">labels_</span><span class="p">[</span><span class="n">temp_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">p_temp</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">temp_idx</span><span class="p">]</span>
+                <span class="c1"># TODO: check if taking the maximum force one makes sense</span>
+                <span class="n">max_force_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">forces</span><span class="p">[</span><span class="n">temp_idx</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p_temp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">final_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">temp_idx</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="n">max_force_idx</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># TODO: find collinear and/or plane convex hull</span>
+                    <span class="n">final_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">temp_idx</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="n">max_force_idx</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">temp_idx</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">final_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
+
+        <span class="c1"># select only final ones</span>
+        <span class="n">normals</span> <span class="o">=</span> <span class="n">normals</span><span class="p">[</span><span class="n">final_indexes</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">final_indexes</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">forces</span> <span class="o">=</span> <span class="n">forces</span><span class="p">[</span><span class="n">final_indexes</span><span class="p">]</span>
+        <span class="n">frictions</span> <span class="o">=</span> <span class="n">frictions</span><span class="p">[</span><span class="n">final_indexes</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">points</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">forces</span><span class="p">,</span> <span class="n">frictions</span></div>
+
+<div class="viewcode-block" id="Grasp.compute_cone"><a class="viewcode-back" href="../../grasp.html#pybullet_grasper.grasp.Grasp.compute_cone">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_cone</span><span class="p">(</span><span class="n">mus</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">forces</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_edges</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to compute the friction cone for given normal force</span>
+<span class="sd">        :param mus: friction coefficient</span>
+<span class="sd">        :type mus: array of floats</span>
+<span class="sd">        :param forces: normal forces in the touch points</span>
+<span class="sd">        :type forces: Nx3 np.array()</span>
+<span class="sd">        :param normals: the size of the force</span>
+<span class="sd">        :type normals: Nx1 np.array()</span>
+<span class="sd">        :param points: array with contact points</span>
+<span class="sd">        :type points: Nx3 np.array/</span>
+<span class="sd">        :param num_edges: number of edges to approximate the cone</span>
+<span class="sd">        :type num_edges: int, optional, default=8</span>
+<span class="sd">        :return: approximated forces on the edge of the friction cones</span>
+<span class="sd">        :rtype: tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">forces_Linf</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">forces_L1</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sum_forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">forces</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">forces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">mus</span><span class="p">,</span> <span class="n">forces</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+            <span class="c1"># force = 1</span>
+
+            <span class="c1"># r = mu*force</span>
+            <span class="c1"># # split the circle in num_edges parts (for default=8, it will split by 45 degrees)</span>
+            <span class="c1"># thetas = np.arange(0, 2*np.pi, 2*np.pi/num_edges)</span>
+            <span class="c1">#</span>
+            <span class="c1"># # compute forces on circle, with the same height</span>
+            <span class="c1"># forces_local = np.vstack((r*np.cos(thetas), r*np.sin(thetas), np.tile(force, (num_edges, )))).T</span>
+
+
+            <span class="c1"># # Rotation axis is cross product of original z-axis (0, 0, 1) to the new z-axis (normal_force)</span>
+            <span class="c1"># rotation_axis = np.cross(np.array([0, 0, 1]), normal)</span>
+            <span class="c1">#</span>
+            <span class="c1"># sin = np.linalg.norm(rotation_axis)</span>
+            <span class="c1"># cos = np.dot(np.array([0, 0, 1]), normal)</span>
+            <span class="c1">#</span>
+            <span class="c1"># # Normalize the rotation axis</span>
+            <span class="c1"># rotation_axis = rotation_axis/sin</span>
+            <span class="c1">#</span>
+            <span class="c1"># # Skew matrix from the rotation axis</span>
+            <span class="c1"># skew = np.array([[0, -rotation_axis[2], rotation_axis[1]],</span>
+            <span class="c1">#                  [rotation_axis[2], 0, -rotation_axis[0]],</span>
+            <span class="c1">#                  [-rotation_axis[1], rotation_axis[0], 0]])</span>
+            <span class="c1"># # Rodriguez formula</span>
+            <span class="c1"># R = np.eye(3) + sin*skew + (1-cos)*(skew @ skew)</span>
+            <span class="c1">#</span>
+            <span class="c1"># forces_local = (R @ forces_local.T).T</span>
+            <span class="c1">#</span>
+            <span class="n">ns</span> <span class="o">=</span> <span class="n">null_space</span><span class="p">(</span><span class="n">normal</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">f_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span> <span class="o">+</span> <span class="n">mu</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">u</span> <span class="o">+</span> <span class="n">mu</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">scales</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="n">f_len</span> <span class="o">*</span> <span class="mi">1</span><span class="o">/</span><span class="n">num_edges</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">f_len</span> <span class="o">*</span> <span class="mi">1</span><span class="o">/</span><span class="n">num_edges</span> <span class="o">*</span> <span class="n">force</span><span class="o">/</span><span class="n">sum_forces</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">scale</span><span class="p">,</span> <span class="n">forces_temp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">scales</span><span class="p">,</span> <span class="p">[</span><span class="n">forces_Linf</span><span class="p">,</span> <span class="n">forces_L1</span><span class="p">]):</span>
+                <span class="n">forces_local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_edges</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_edges</span><span class="p">):</span>
+                    <span class="n">forces_local</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">scale</span><span class="o">*</span><span class="n">normal</span> <span class="o">+</span> \
+                                         <span class="n">scale</span><span class="o">*</span><span class="n">mu</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">j</span><span class="o">/</span><span class="n">num_edges</span><span class="p">)</span><span class="o">*</span><span class="n">u</span> <span class="o">+</span> <span class="n">scale</span><span class="o">*</span><span class="n">mu</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">j</span><span class="o">/</span><span class="n">num_edges</span><span class="p">)</span><span class="o">*</span><span class="n">v</span>
+
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">forces_local</span><span class="p">:</span>
+                    <span class="n">forces_temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">forces_Linf</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">forces_L1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Grasp.compute_gws_mesh"><a class="viewcode-back" href="../../grasp.html#pybullet_grasper.grasp.Grasp.compute_gws_mesh">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">compute_gws_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fixed_set</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">hull_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO: This works only when full 6D hull is computed</span>
+        <span class="n">hyperplanes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hulls</span><span class="p">[</span><span class="n">hull_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">equations</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_to_3d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">fixed_set</span><span class="p">,</span> <span class="n">hyperplanes</span><span class="p">,</span> <span class="n">hull_type</span><span class="o">=</span><span class="n">hull_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Grasp.MinkowskiSum"><a class="viewcode-back" href="../../grasp.html#pybullet_grasper.grasp.Grasp.MinkowskiSum">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">MinkowskiSum</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively compute Minkowski sum of individual wrenches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrenches</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">cone_vertices</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">contacts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrench_id</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">contacts</span> <span class="o">=</span> <span class="n">contacts</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="o">=</span> <span class="n">dims</span>
+
+            <span class="c1"># m^n elements</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrenches_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">cone_vertices</span> <span class="o">**</span> <span class="n">contacts</span><span class="p">,</span> <span class="n">dims</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">cone_vertices</span> <span class="o">=</span> <span class="n">cone_vertices</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrenches</span> <span class="o">=</span> <span class="n">wrenches</span>
+
+<div class="viewcode-block" id="Grasp.MinkowskiSum.minkowski_sum"><a class="viewcode-back" href="../../grasp.html#pybullet_grasper.grasp.Grasp.MinkowskiSum.minkowski_sum">[docs]</a>        <span class="k">def</span><span class="w"> </span><span class="nf">minkowski_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contact_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prev_sum</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">used_wrenches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Recursive function itself</span>
+<span class="sd">            :param contact_id: id of contact</span>
+<span class="sd">            :type contact_id: int</span>
+<span class="sd">            :param prev_sum: previous sum; used to sum more than two wrenches</span>
+<span class="sd">            :type prev_sum: np.ndarray, optional, default=None</span>
+<span class="sd">            :param used_wrenches: number of currently selected wrenches</span>
+<span class="sd">            :type used_wrenches: int, optional, default=0</span>
+<span class="sd">            :return: 0</span>
+<span class="sd">            :rtype: int</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="c1"># so we can use class variable in argument</span>
+            <span class="k">if</span> <span class="n">prev_sum</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">prev_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">contact_id</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">contacts</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">used_wrenches</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">contacts</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wrenches_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">wrench_id</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">prev_sum</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wrench_id</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">return</span> <span class="mi">0</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">minkowski_sum</span><span class="p">(</span><span class="n">contact_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">prev_sum</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cone_vertices</span><span class="p">):</span>
+                <span class="n">cur_sum</span> <span class="o">=</span> <span class="n">prev_sum</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrenches</span><span class="p">[</span><span class="n">contact_id</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cone_vertices</span> <span class="o">+</span> <span class="n">m</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">minkowski_sum</span><span class="p">(</span><span class="n">contact_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cur_sum</span><span class="p">,</span> <span class="n">used_wrenches</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="mi">0</span></div></div>
+
+<div class="viewcode-block" id="Grasp.evaluate_contact"><a class="viewcode-back" href="../../grasp.html#pybullet_grasper.grasp.Grasp.evaluate_contact">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_contact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hull_types</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;L1&quot;</span><span class="p">,</span> <span class="s2">&quot;Linf&quot;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ConvexHull</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Call necessary function and computes the convex hull of wrenches</span>
+
+<span class="sd">        :param hull_types: types of hull: L1 or Linf</span>
+<span class="sd">        :type hull_types: list[str], optional, default=[&quot;L1&quot;, &quot;Linf&quot;]</span>
+<span class="sd">        :return: computed convex hulls for requested metrics</span>
+<span class="sd">        :rtype: dict[str, scipy.spatial.ConvexHull]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">graspable_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span>
+        <span class="n">cone_vertices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analytical</span><span class="o">.</span><span class="n">cone_vertices</span>
+        <span class="n">position</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="n">graspable_object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getMatrixFromQuaternion</span><span class="p">(</span><span class="n">orientation</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose</span> <span class="o">=</span> <span class="n">R</span>
+
+        <span class="c1"># torque origin is the center of gravity of the object</span>
+        <span class="c1"># it must be recomputed every time, as it changes with the change in position of the body</span>
+        <span class="n">torque_origin</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="n">graspable_object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">torque_origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">torque_origin</span><span class="p">)</span>
+
+        <span class="c1"># get contact information</span>
+        <span class="n">points</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">forces</span><span class="p">,</span> <span class="n">frictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_contact_info</span><span class="p">(</span><span class="n">graspable_object</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">torque_origin</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">points</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No contact found&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">draw_normal_forces</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">torque_origin</span><span class="p">)</span>
+
+        <span class="c1"># Compute friction cones</span>
+        <span class="n">forces_from_cones_Linf</span><span class="p">,</span> <span class="n">forces_from_cones_L1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_cone</span><span class="p">(</span><span class="n">frictions</span><span class="p">,</span> <span class="n">forces</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">cone_vertices</span><span class="p">)</span>
+
+        <span class="c1"># torque_multiplier = 1/r; r is max radius from torque origin</span>
+        <span class="c1"># we use r precomputed in the beginning, as it is not changing given the position/orientation of the body</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">graspable_object</span><span class="o">.</span><span class="n">r</span>
+
+        <span class="c1"># torque = torque_multiplier * ((position - torque_origin) x force_vector)</span>
+        <span class="n">points_concat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">cone_vertices</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">points_concat</span><span class="c1">#-torque_origin</span>
+        <span class="c1"># d /= np.linalg.norm(d, axis=1).reshape(-1, 1)</span>
+        <span class="n">torques_Linf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">forces_from_cones_Linf</span><span class="p">)</span><span class="o">/</span><span class="n">r</span>
+        <span class="n">torques_L1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">forces_from_cones_L1</span><span class="p">)</span><span class="o">/</span><span class="n">r</span>
+
+        <span class="c1"># # Visualize</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">draw_force_torques</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">forces_from_cones_Linf</span><span class="p">),</span> <span class="n">torques_Linf</span><span class="p">,</span> <span class="n">cone_vertices</span><span class="p">,</span>
+                                                      <span class="n">forces</span><span class="p">,</span> <span class="n">torque_origin</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Only </span><span class="si">{</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> contacts found. At least 2 contacts are needed to create GWS.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">wrenches_Linf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">forces_from_cones_Linf</span><span class="p">,</span> <span class="n">torques_Linf</span><span class="p">))</span>
+        <span class="n">wrenches_Linf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">wrenches_Linf</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+
+        <span class="n">wrenches_L1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">forces_from_cones_L1</span><span class="p">,</span> <span class="n">torques_L1</span><span class="p">))</span>
+        <span class="n">wrenches_L1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">wrenches_L1</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="n">wrenches</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Linf&quot;</span><span class="p">:</span> <span class="n">wrenches_Linf</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">:</span> <span class="n">wrenches_L1</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">hull_type</span> <span class="ow">in</span> <span class="n">hull_types</span><span class="p">:</span>
+            <span class="n">wrenches_temp</span> <span class="o">=</span> <span class="n">wrenches</span><span class="p">[</span><span class="n">hull_type</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">hull_type</span> <span class="o">==</span> <span class="s2">&quot;Linf&quot;</span><span class="p">:</span>  <span class="c1"># do minkowski sum</span>
+                <span class="n">ms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MinkowskiSum</span><span class="p">(</span><span class="n">wrenches_temp</span><span class="p">,</span> <span class="n">cone_vertices</span><span class="p">,</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">ms</span><span class="o">.</span><span class="n">minkowski_sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">wrenches_temp</span> <span class="o">=</span> <span class="n">ms</span><span class="o">.</span><span class="n">wrenches_out</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analytical</span><span class="o">.</span><span class="n">gws</span><span class="o">.</span><span class="n">scale</span><span class="p">:</span>
+                <span class="n">wrenches_temp</span> <span class="o">=</span> <span class="p">(((</span><span class="n">wrenches_temp</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">wrenches_temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">*</span>
+                                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analytical</span><span class="o">.</span><span class="n">gws</span><span class="o">.</span><span class="n">scale_interval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analytical</span><span class="o">.</span><span class="n">gws</span><span class="o">.</span><span class="n">scale_interval</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                                 <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">wrenches_temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">wrenches_temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span> \
+                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analytical</span><span class="o">.</span><span class="n">gws</span><span class="o">.</span><span class="n">scale_interval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">output</span><span class="p">[</span><span class="n">hull_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">ConvexHull</span><span class="p">(</span><span class="n">wrenches_temp</span><span class="p">,</span> <span class="n">qhull_options</span><span class="o">=</span><span class="s2">&quot;n Qx C-&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analytical</span><span class="o">.</span><span class="n">gws</span><span class="o">.</span><span class="n">merging_radius</span><span class="p">)</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="n">hull_type</span><span class="p">]</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="o">-</span><span class="n">h</span><span class="o">.</span><span class="n">equations</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">volume</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">volume</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hull </span><span class="si">{</span><span class="n">hull_type</span><span class="si">}</span><span class="s2"> created with volume </span><span class="si">{</span><span class="n">volume</span><span class="si">}</span><span class="s2"> and epsilon </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hull </span><span class="si">{</span><span class="n">hull_type</span><span class="si">}</span><span class="s2"> cannot be created.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;With an exception: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">output</span> <span class="o">!=</span> <span class="p">{}</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">show_menu</span><span class="o">.</span><span class="n">set_enabled</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hulls</span> <span class="o">=</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="Grasp.project_to_3d"><a class="viewcode-back" href="../../grasp.html#pybullet_grasper.grasp.Grasp.project_to_3d">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">project_to_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where_to_project</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">fixed_coordinates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">hyperplanes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">hull_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;L1_fixed_force&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Projects selected dimensions of a 6D hull to 3D and builds a mesh for visualization.</span>
+
+<span class="sd">        :param where_to_project: values used for fixed dimensions during projection</span>
+<span class="sd">        :type where_to_project: np.ndarray</span>
+<span class="sd">        :param fixed_coordinates: indices of coordinates that stay fixed during projection</span>
+<span class="sd">        :type fixed_coordinates: list[int]</span>
+<span class="sd">        :param hyperplanes: hyperplane representation of the source hull</span>
+<span class="sd">        :type hyperplanes: np.ndarray</span>
+<span class="sd">        :param hull_type: name used as key in visualized GWS meshes</span>
+<span class="sd">        :type hull_type: str, optional, default=&quot;L1_fixed_force&quot;</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># where_to_project = [0, 0, 0, 0, 0, 0]</span>
+        <span class="c1"># fixedSet = [0, 1, 2] or [3, 4, 5] depending whether fixing force or torque</span>
+
+        <span class="c1"># Get free coordinates as opposite to the fixed ones</span>
+        <span class="n">free_coordinates</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">where_to_project</span><span class="p">))</span> <span class="k">if</span> <span class="n">_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fixed_coordinates</span><span class="p">]</span>
+
+        <span class="n">planes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Project the hyperplanes to 3D</span>
+        <span class="k">for</span> <span class="n">hyperplane</span> <span class="ow">in</span> <span class="n">hyperplanes</span><span class="p">:</span>
+            <span class="n">hyperplane_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">hyperplane</span><span class="p">[</span><span class="n">free_coordinates</span><span class="p">])</span>
+
+            <span class="c1"># To check non-zero hyperplanes</span>
+            <span class="k">if</span> <span class="n">hyperplane_len</span> <span class="o">&gt;</span> <span class="mf">1e-11</span><span class="p">:</span>
+                <span class="n">temp_plane</span> <span class="o">=</span> <span class="n">hyperplane</span><span class="p">[</span><span class="n">free_coordinates</span><span class="p">]</span> <span class="o">/</span> <span class="n">hyperplane_len</span>
+                <span class="c1"># offset of the plane from 3D origin</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="n">hyperplane</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">hyperplane</span><span class="p">[</span><span class="n">fixed_coordinates</span><span class="p">]</span> <span class="o">@</span> <span class="n">where_to_project</span><span class="p">[</span>
+                    <span class="n">fixed_coordinates</span><span class="p">])</span> <span class="o">/</span> <span class="n">hyperplane_len</span>
+                <span class="n">temp_plane</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_plane</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+                <span class="n">planes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_plane</span><span class="p">)</span>
+
+        <span class="n">planes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">planes</span><span class="p">)</span>
+
+        <span class="c1"># Get feasible point by linear programming magic</span>
+        <span class="n">norm_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">planes</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">planes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">planes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],))</span>
+        <span class="n">c</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">planes</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">norm_vector</span><span class="p">))</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="o">-</span> <span class="n">planes</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">linprog</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">A_ub</span><span class="o">=</span><span class="n">A</span><span class="p">,</span> <span class="n">b_ub</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;highs-ipm&quot;</span><span class="p">)</span>
+
+        <span class="n">interior_point</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cleared_planes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">wrong_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">plane</span> <span class="ow">in</span> <span class="n">planes</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">plane</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">plane</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">@</span> <span class="n">interior_point</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cleared_planes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">wrong_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">wrong_counter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wrong_counter</span><span class="si">}</span><span class="s2"> hyperplanes were wrong for </span><span class="si">{</span><span class="n">hull_type</span><span class="si">}</span><span class="s2">. The hull be will be most probably incorrect.&quot;</span><span class="p">)</span>
+        <span class="n">cleared_planes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cleared_planes</span><span class="p">)</span>
+
+        <span class="c1"># planes, interior point from linear programming</span>
+        <span class="n">hsi</span> <span class="o">=</span> <span class="n">HalfspaceIntersection</span><span class="p">(</span><span class="n">cleared_planes</span><span class="p">,</span> <span class="n">interior_point</span><span class="p">,</span> <span class="n">qhull_options</span><span class="o">=</span><span class="s2">&quot;Pp Qbb&quot;</span><span class="p">)</span>
+
+        <span class="c1"># normal/offset</span>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="n">hsi</span><span class="o">.</span><span class="n">dual_equations</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="o">-</span><span class="n">hsi</span><span class="o">.</span><span class="n">dual_equations</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="c1"># just for better visualization</span>
+        <span class="n">vertices</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">pc</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">PointCloud</span><span class="p">(</span><span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3dVector</span><span class="p">(</span><span class="n">vertices</span><span class="p">))</span>
+        <span class="n">hull_mesh</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">compute_convex_hull</span><span class="p">()</span>
+
+        <span class="n">hull_mesh</span><span class="o">.</span><span class="n">orient_triangles</span><span class="p">()</span>
+        <span class="n">hull_mesh</span><span class="o">.</span><span class="n">compute_triangle_normals</span><span class="p">()</span>
+        <span class="n">hull_mesh</span><span class="o">.</span><span class="n">paint_uniform_color</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Check for inversion -&gt; if angle between triangle normal and vector between triangle center and center is &lt;90</span>
+        <span class="c1">#                        - this works because the hulls are convex!</span>
+        <span class="n">triangle_normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">hull_mesh</span><span class="o">.</span><span class="n">triangle_normals</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">triangle_to_center</span> <span class="o">=</span> <span class="n">hull_mesh</span><span class="o">.</span><span class="n">get_center</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">hull_mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">hull_mesh</span><span class="o">.</span><span class="n">triangles</span><span class="p">)[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">triangle_normal</span><span class="p">,</span> <span class="n">triangle_to_center</span><span class="p">)),</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">triangle_normal</span><span class="p">,</span> <span class="n">triangle_to_center</span><span class="p">))</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">angle</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">angle</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">270</span><span class="p">:</span>
+            <span class="n">hull_mesh</span><span class="o">.</span><span class="n">triangles</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3iVector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="n">hull_mesh</span><span class="o">.</span><span class="n">triangles</span><span class="p">))</span>
+            <span class="n">hull_mesh</span><span class="o">.</span><span class="n">compute_triangle_normals</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gws_meshes</span><span class="p">[</span><span class="n">hull_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">hull_mesh</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

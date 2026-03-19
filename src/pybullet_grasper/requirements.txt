@@ -1,0 +1,4 @@
+open3d > 0.16.0
+numpy < 2
+pybullet
+scipy

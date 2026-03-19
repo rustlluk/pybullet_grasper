@@ -1,0 +1,7 @@
+std_msgs/String object_name
+std_msgs/String[] grasp_type
+float32[] init_position
+---
+geometry_msgs/Pose[] poses
+float32[] qualities
+float32[] poses_after_grasps

@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grasp &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/jquery.js?v=5d32c60e"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/https://rustlluk.github.io/pybullet_grasper/documentation/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/doctools.js?v=888ff710"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="grasp_generator" href="grasp_generator.html" />
+    <link rel="prev" title="bullet_classes" href="bullet_classes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Grasping with PyBullet</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html#pybullet-grasper">pybullet_grasper</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bullet_classes.html">bullet_classes</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">grasp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp"><code class="docutils literal notranslate"><span class="pre">Grasp</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp.MinkowskiSum"><code class="docutils literal notranslate"><span class="pre">Grasp.MinkowskiSum</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp.colors"><code class="docutils literal notranslate"><span class="pre">Grasp.colors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp.compute_cone"><code class="docutils literal notranslate"><span class="pre">Grasp.compute_cone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp.compute_gws_mesh"><code class="docutils literal notranslate"><span class="pre">Grasp.compute_gws_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp.evaluate_contact"><code class="docutils literal notranslate"><span class="pre">Grasp.evaluate_contact()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp.get_contact_info"><code class="docutils literal notranslate"><span class="pre">Grasp.get_contact_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp.project_to_3d"><code class="docutils literal notranslate"><span class="pre">Grasp.project_to_3d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.grasp.Grasp.rgb_colors"><code class="docutils literal notranslate"><span class="pre">Grasp.rgb_colors</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html">grasp_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator_service.html">grasp_generator_service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasper_main.html">grasper_main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Grasping with PyBullet</a></li>
+      <li class="breadcrumb-item active">grasp</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="https://rustlluk.github.io/pybullet_grasper/documentation/_sources/grasp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pybullet_grasper.grasp">
+<span id="grasp"></span><h1>grasp<a class="headerlink" href="#module-pybullet_grasper.grasp" title="Permalink to this heading"></a></h1>
+<p>Main class for analytic metrics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lukas Rustler</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.grasp.</span></span><span class="sig-name descname"><span class="pre">Grasp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/grasp.html#Grasp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.grasp.Grasp" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to encapsulate functions regarding grasp quality.
+Based on: <a class="reference external" href="https://ieeexplore.ieee.org/document/1371616/">https://ieeexplore.ieee.org/document/1371616/</a> and <a class="reference external" href="https://ieeexplore.ieee.org/document/772531/">https://ieeexplore.ieee.org/document/772531/</a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.MinkowskiSum">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MinkowskiSum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wrenches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cone_vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contacts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/grasp.html#Grasp.MinkowskiSum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.MinkowskiSum" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Recursively compute Minkowski sum of individual wrenches.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.MinkowskiSum.minkowski_sum">
+<span class="sig-name descname"><span class="pre">minkowski_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contact_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_sum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_wrenches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/grasp.html#Grasp.MinkowskiSum.minkowski_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.MinkowskiSum.minkowski_sum" title="Permalink to this definition"></a></dt>
+<dd><p>Recursive function itself
+:param contact_id: id of contact
+:type contact_id: int
+:param prev_sum: previous sum; used to sum more than two wrenches
+:type prev_sum: np.ndarray, optional, default=None
+:param used_wrenches: number of currently selected wrenches
+:type used_wrenches: int, optional, default=0
+:return: 0
+:rtype: int</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.colors">
+<span class="sig-name descname"><span class="pre">colors</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['#1f77b4',</span> <span class="pre">'#ff7f0e',</span> <span class="pre">'#2ca02c',</span> <span class="pre">'#d62728',</span> <span class="pre">'#9467bd',</span> <span class="pre">'#8c564b',</span> <span class="pre">'#e377c2',</span> <span class="pre">'#7f7f7f',</span> <span class="pre">'#bcbd22',</span> <span class="pre">'#17becf']</span></em><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.colors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.compute_cone">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_cone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/grasp.html#Grasp.compute_cone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.compute_cone" title="Permalink to this definition"></a></dt>
+<dd><p>Function to compute the friction cone for given normal force
+:param mus: friction coefficient
+:type mus: array of floats
+:param forces: normal forces in the touch points
+:type forces: Nx3 np.array()
+:param normals: the size of the force
+:type normals: Nx1 np.array()
+:param points: array with contact points
+:type points: Nx3 np.array/
+:param num_edges: number of edges to approximate the cone
+:type num_edges: int, optional, default=8
+:return: approximated forces on the edge of the friction cones
+:rtype: tuple[np.ndarray, np.ndarray]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.compute_gws_mesh">
+<span class="sig-name descname"><span class="pre">compute_gws_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fixed_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hull_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/grasp.html#Grasp.compute_gws_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.compute_gws_mesh" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.evaluate_contact">
+<span class="sig-name descname"><span class="pre">evaluate_contact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hull_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['L1',</span> <span class="pre">'Linf']</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ConvexHull</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/grasp.html#Grasp.evaluate_contact"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.evaluate_contact" title="Permalink to this definition"></a></dt>
+<dd><p>Call necessary function and computes the convex hull of wrenches</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hull_types</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>&quot;L1&quot;</em><em>, </em><em>&quot;Linf&quot;</em><em>]</em>) – types of hull: L1 or Linf</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>computed convex hulls for requested metrics</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, scipy.spatial.ConvexHull]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.get_contact_info">
+<span class="sig-name descname"><span class="pre">get_contact_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">torque_origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/grasp.html#Grasp.get_contact_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.get_contact_info" title="Permalink to this definition"></a></dt>
+<dd><p>Obtain contact information and divide it into arrays
+:param object_id: id of the grasped object
+:type object_id: int
+:return: contact points, contact normals, contact forces, mutual frictions
+:rtype: tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None, np.ndarray | None]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.project_to_3d">
+<span class="sig-name descname"><span class="pre">project_to_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">where_to_project</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperplanes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hull_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'L1_fixed_force'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/grasp.html#Grasp.project_to_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.project_to_3d" title="Permalink to this definition"></a></dt>
+<dd><p>Projects selected dimensions of a 6D hull to 3D and builds a mesh for visualization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>where_to_project</strong> (<em>np.ndarray</em>) – values used for fixed dimensions during projection</p></li>
+<li><p><strong>fixed_coordinates</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – indices of coordinates that stay fixed during projection</p></li>
+<li><p><strong>hyperplanes</strong> (<em>np.ndarray</em>) – hyperplane representation of the source hull</p></li>
+<li><p><strong>hull_type</strong> (<em>str</em><em>, </em><em>optional</em><em>, </em><em>default=&quot;L1_fixed_force&quot;</em>) – name used as key in visualized GWS meshes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.grasp.Grasp.rgb_colors">
+<span class="sig-name descname"><span class="pre">rgb_colors</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([[0.12156863,</span> <span class="pre">0.46666667,</span> <span class="pre">0.70588235],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[1.</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">,</span> <span class="pre">0.49803922,</span> <span class="pre">0.05490196],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.17254902,</span> <span class="pre">0.62745098,</span> <span class="pre">0.17254902],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.83921569,</span> <span class="pre">0.15294118,</span> <span class="pre">0.15686275],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.58039216,</span> <span class="pre">0.40392157,</span> <span class="pre">0.74117647],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.54901961,</span> <span class="pre">0.3372549</span> <span class="pre">,</span> <span class="pre">0.29411765],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.89019608,</span> <span class="pre">0.46666667,</span> <span class="pre">0.76078431],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.49803922,</span> <span class="pre">0.49803922,</span> <span class="pre">0.49803922],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.7372549</span> <span class="pre">,</span> <span class="pre">0.74117647,</span> <span class="pre">0.13333333],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0.09019608,</span> <span class="pre">0.74509804,</span> <span class="pre">0.81176471]])</span></em><a class="headerlink" href="#pybullet_grasper.grasp.Grasp.rgb_colors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bullet_classes.html" class="btn btn-neutral float-left" title="bullet_classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grasp_generator.html" class="btn btn-neutral float-right" title="grasp_generator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

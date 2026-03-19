@@ -1,0 +1,50 @@
+gripper: "robotiq" # which gripper to use
+                   # default: "robotiq"
+                   # "robotiq", "barrett"
+debug: True # whether to show interactive visualization and debug prints
+               # default: False
+               # True, False
+
+visualization: # global visualization settings
+  resolution: [1280, 720] # resolution of the interactive windows; other windows are 640x480
+                          # default [1280, 720]
+                          # [int, int]
+
+  debug_sleep: 0.01 # sleep in second when showing the best grasp; value of 0 is super fast and you will not see the evolution just the results
+                 # default: 0.01
+                 # float
+  show_last: True # whether to the best grasp. Only work with debug=True
+                 # default: False
+                 # True, False
+contacts: # global contacts settings
+  time_step: 480 # 1/time_step is one step of pybullet
+                 # default: 480
+                 # int; the higher, the slower but more accurate simulation
+  detection_method: "force" # method of contact detection
+                             # default: force
+                             # force, contact_torque, contact_velocity, contact_sides, contact_force
+  contact_threshold: 5 # threshold for contact detection
+                       # default: 10 (works for 'force')
+                       # float
+  move_to_grasp_pose: True
+analytical:
+  enabled: False # whether to compute the analytical grasp quality metrics
+                 # default: False
+                 # bool; True, False
+  cone_vertices: 8 # number of vertices for the cone approximation of the friction cone
+                   # default: 8
+                   # int
+  force_threshold: 0 # threhold for force applied on object; only consider the contact points with force above this threshold
+                   # default: 0
+                   # float
+  gws:
+    merging_radius: 1e-4 # http://www.qhull.org/html/qh-optc.htm#Cn
+      # default: 1e-4
+    # lower value -> longer time, but even degenerate hulls can be computed
+    # higher value -> shorter time, but degenerate hulls wil fail to create
+    scale: True # whether to scale wrenches before GWS computation
+    # default: True
+    # True, False
+    scale_interval: [ -0.5, 0.5 ] # scale interval for wrenches
+    # default: [-1, 1]
+    # [float, float]

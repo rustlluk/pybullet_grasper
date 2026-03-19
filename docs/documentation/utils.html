@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utils &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/jquery.js?v=5d32c60e"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/https://rustlluk.github.io/pybullet_grasper/documentation/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/doctools.js?v=888ff710"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="visualization" href="visualization.html" />
+    <link rel="prev" title="grasper_main" href="grasper_main.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Grasping with PyBullet</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html#pybullet-grasper">pybullet_grasper</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bullet_classes.html">bullet_classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp.html">grasp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html">grasp_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator_service.html">grasp_generator_service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasper_main.html">grasper_main</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.utils.Config.set_attribute"><code class="docutils literal notranslate"><span class="pre">Config.set_attribute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.GenerateGraspsResponse"><code class="docutils literal notranslate"><span class="pre">GenerateGraspsResponse</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.Logger"><code class="docutils literal notranslate"><span class="pre">Logger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.utils.Logger.log_critical"><code class="docutils literal notranslate"><span class="pre">Logger.log_critical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.utils.Logger.log_debug"><code class="docutils literal notranslate"><span class="pre">Logger.log_debug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.utils.Logger.log_error"><code class="docutils literal notranslate"><span class="pre">Logger.log_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.utils.Logger.log_info"><code class="docutils literal notranslate"><span class="pre">Logger.log_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.utils.Logger.log_warning"><code class="docutils literal notranslate"><span class="pre">Logger.log_warning()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.MeshInfo"><code class="docutils literal notranslate"><span class="pre">MeshInfo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.Point"><code class="docutils literal notranslate"><span class="pre">Point</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.Quaternion"><code class="docutils literal notranslate"><span class="pre">Quaternion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.get_data_folder"><code class="docutils literal notranslate"><span class="pre">get_data_folder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.utils.suppress_c_output"><code class="docutils literal notranslate"><span class="pre">suppress_c_output()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Grasping with PyBullet</a></li>
+      <li class="breadcrumb-item active">utils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="https://rustlluk.github.io/pybullet_grasper/documentation/_sources/utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pybullet_grasper.utils">
+<span id="utils"></span><h1>utils<a class="headerlink" href="#module-pybullet_grasper.utils" title="Permalink to this heading"></a></h1>
+<p>Small utils</p>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lukas Rustler</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to parse and keep the config loaded from yaml file</p>
+<p>Loads YAML config and exposes keys as object attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config_path</strong> (<em>str</em>) – path to YAML config file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Config.set_attribute">
+<span class="sig-name descname"><span class="pre">set_attribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Config.set_attribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Config.set_attribute" title="Permalink to this definition"></a></dt>
+<dd><p>Function to recursively fill the instance variables from dictionary. When value is non-dict, it is directly
+assigned to a variable. Else, the dict is recursively parsed.
+:param attr: name of the attribute
+:type attr: str
+:param value: value of the attribute
+:type value: str, float, int, dict, list, … - and other that can be loaded from yaml
+:param reference: reference to the parent class. “self” for the upper attributes, pointer to namedtuple for</p>
+<blockquote>
+<div><p>inner attributes</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>0</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.GenerateGraspsResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">GenerateGraspsResponse</span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#GenerateGraspsResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.GenerateGraspsResponse" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Logger">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">Logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ros</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Logger" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to handle logging for both ROS and non-ROS behaviours</p>
+<p>Initializes logger backend for ROS or standard Python logging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ros</strong> (<em>bool</em>) – whether ROS logging API should be used</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – enables debug-level logs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Logger.log_critical">
+<span class="sig-name descname"><span class="pre">log_critical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Logger.log_critical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Logger.log_critical" title="Permalink to this definition"></a></dt>
+<dd><p>Logs a critical/fatal message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Any</em>) – message payload</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Logger.log_debug">
+<span class="sig-name descname"><span class="pre">log_debug</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Logger.log_debug"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Logger.log_debug" title="Permalink to this definition"></a></dt>
+<dd><p>Logs a debug message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Any</em>) – message payload</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Logger.log_error">
+<span class="sig-name descname"><span class="pre">log_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Logger.log_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Logger.log_error" title="Permalink to this definition"></a></dt>
+<dd><p>Logs an error message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Any</em>) – message payload</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Logger.log_info">
+<span class="sig-name descname"><span class="pre">log_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Logger.log_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Logger.log_info" title="Permalink to this definition"></a></dt>
+<dd><p>Logs an info message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Any</em>) – message payload</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Logger.log_warning">
+<span class="sig-name descname"><span class="pre">log_warning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Logger.log_warning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Logger.log_warning" title="Permalink to this definition"></a></dt>
+<dd><p>Logs a warning message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>Any</em>) – message payload</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.MeshInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">MeshInfo</span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#MeshInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.MeshInfo" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Point">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">Point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Point" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Pose">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">Pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybullet_grasper.utils.Point" title="pybullet_grasper.utils.Point"><span class="pre">Point</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybullet_grasper.utils.Quaternion" title="pybullet_grasper.utils.Quaternion"><span class="pre">Quaternion</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Pose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Pose" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.Quaternion">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">Quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#Quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.Quaternion" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.get_data_folder">
+<span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">get_data_folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#get_data_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.get_data_folder" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pybullet_grasper.utils.suppress_c_output">
+<span class="sig-prename descclassname"><span class="pre">pybullet_grasper.utils.</span></span><span class="sig-name descname"><span class="pre">suppress_c_output</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/utils.html#suppress_c_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.utils.suppress_c_output" title="Permalink to this definition"></a></dt>
+<dd><p>Context manager to suppress C/C++ level stdout and stderr.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grasper_main.html" class="btn btn-neutral float-left" title="grasper_main" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="visualization.html" class="btn btn-neutral float-right" title="visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

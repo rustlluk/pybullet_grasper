@@ -1,0 +1,579 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybullet_grasper.grasp_generator &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Grasping with PyBullet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html#pybullet-grasper">pybullet_grasper</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybullet_grasper.grasp_generator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybullet_grasper.grasp_generator</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Main grasp processing</span>
+
+<span class="sd">:Author: Lukas Rustler</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">signal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_grasper.bullet_classes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">Robotiq_2f_85</span><span class="p">,</span> <span class="n">Barrett</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_grasper.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_grasper.grasp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Grasp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_grasper.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">Visualizer</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">subprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">call</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">open3d</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">o3d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rotation</span> <span class="k">as</span> <span class="n">ts</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+
+
+<span class="n">Vector3</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="signal_handler"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.signal_handler">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">signal_handler</span><span class="p">(</span><span class="n">signal</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handler for killing the program</span>
+<span class="sd">    :param signal: signal type</span>
+<span class="sd">    :type signal: int</span>
+<span class="sd">    :param frame: current frame where signal interrupted execution</span>
+<span class="sd">    :type frame: Any</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :rtype: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Killing on user request&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s2">&quot;pgrep -f grasp_generator.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">call</span><span class="p">(</span><span class="s2">&quot;kill -9 &quot;</span><span class="o">+</span><span class="n">_</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClientProcess"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.ClientProcess">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ClientProcess</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">gripper_poses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">score</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">after_grasp_poses</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Worker process that evaluates a batch of candidate grasp poses.</span>
+
+<span class="sd">        :param client: shared simulation client template</span>
+<span class="sd">        :type client: Client</span>
+<span class="sd">        :param id: worker/process identifier</span>
+<span class="sd">        :type id: int</span>
+<span class="sd">        :param gripper_poses: pose candidates assigned to this worker</span>
+<span class="sd">        :type gripper_poses: list[Any]</span>
+<span class="sd">        :param score: shared array storing pose quality scores</span>
+<span class="sd">        :type score: Any</span>
+<span class="sd">        :param after_grasp_poses: shared array storing object poses after grasping</span>
+<span class="sd">        :type after_grasp_poses: Any</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gripper_poses</span> <span class="o">=</span> <span class="n">gripper_poses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span> <span class="o">=</span> <span class="n">Grasp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">after_grasp_poses</span> <span class="o">=</span> <span class="n">after_grasp_poses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ClientProcess.test_grasp"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.ClientProcess.test_grasp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_grasp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gripper_pose</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">pose_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simulates one grasp attempt and stores its score.</span>
+
+<span class="sd">        :param gripper_pose: candidate end-effector pose</span>
+<span class="sd">        :type gripper_pose: Any</span>
+<span class="sd">        :param pose_id: index into shared result arrays</span>
+<span class="sd">        :type pose_id: int</span>
+<span class="sd">        :return: 0 after evaluation completes</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">gripper</span> <span class="o">==</span> <span class="s2">&quot;barrett&quot;</span><span class="p">:</span>
+            <span class="n">gripper_f</span> <span class="o">=</span> <span class="n">Barrett</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">gripper</span> <span class="o">==</span> <span class="s2">&quot;robotiq&quot;</span><span class="p">:</span>
+            <span class="n">gripper_f</span> <span class="o">=</span> <span class="n">Robotiq_2f_85</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span> <span class="o">=</span> <span class="n">gripper_f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
+                                            <span class="p">[</span><span class="n">gripper_pose</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]],</span>
+                                            <span class="p">[</span><span class="n">gripper_pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+
+        <span class="n">collisions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">plane</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">collisions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">contactPoints</span><span class="p">[</span><span class="s2">&quot;DISTANCE&quot;</span><span class="p">]]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1e-2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Gripper is in collision with the plane&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">move_to_grasp_pose</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">collisions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">collisions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">contactPoints</span><span class="p">[</span><span class="s2">&quot;DISTANCE&quot;</span><span class="p">]]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1e-2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Gripper is in collision with the object&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">before_grasp_pos</span><span class="p">,</span> <span class="n">before_grasp_ori</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">set_gripper_pose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analytical</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">evaluate_contact</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_info</span><span class="p">(</span><span class="s2">&quot;Press Q to continue&quot;</span><span class="p">)</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">is_alive</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">last_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">last_key</span> <span class="o">==</span> <span class="s2">&quot;q&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">last_key</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">break</span>
+
+        <span class="n">start_pos</span><span class="p">,</span> <span class="n">start_ori</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">start_pos_gripper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">initial_difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">start_pos</span> <span class="o">-</span> <span class="n">start_pos_gripper</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">lower_the_plane</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+        <span class="n">lift_pos_gripper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">lift_pos</span><span class="p">,</span> <span class="n">lift_ori</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Move timeout&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span>
+
+        <span class="c1"># wait for one simulated second</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">-</span> <span class="n">steps</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">time_step</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="n">end_pos</span><span class="p">,</span> <span class="n">end_ori</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="c1"># if the object is still in the gripper it can be considered stable grasp</span>
+        <span class="n">stable_grasp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="c1"># Difference between start and end of gripper rotation</span>
+        <span class="n">height_dif</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">lift_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">end_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="mi">1000</span>
+        <span class="n">position_distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">end_pos</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lift_pos</span><span class="p">))</span><span class="o">*</span><span class="mi">1000</span>
+
+        <span class="c1"># difference of change of height of gripper and the object</span>
+        <span class="n">obj_gripper_height_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">start_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">lift_pos_gripper</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">-</span><span class="n">initial_difference</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="mi">1000</span>
+
+        <span class="c1"># if the object slided less than 2.5cm</span>
+        <span class="n">firm_grasp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">obj_gripper_height_diff</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">,</span>  <span class="n">position_distance</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">)</span>
+
+        <span class="c1"># change of position during grasping</span>
+        <span class="n">grasp_position_change</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">before_grasp_pos</span><span class="p">)</span> <span class="o">-</span> <span class="n">start_pos</span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span>
+
+        <span class="n">Gr_R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">Gr_R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">from_quat</span><span class="p">([</span><span class="n">gripper_pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">gripper_pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">gripper_pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">gripper_pose</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">w</span><span class="p">])</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Gr_R</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])[:</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># Rotate Z-axis vector to point in direction of gripper</span>
+        <span class="n">direction</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>  <span class="c1"># normalize</span>
+        <span class="c1"># distance_from_top_grasp = np.arctan2(np.linalg.norm(np.cross(direction, [0, 0, -1])), np.dot(direction, [0, 0, -1]))</span>
+        <span class="n">distance_from_top_grasp</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])),</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">[</span><span class="n">pose_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">height_dif</span> <span class="o">+</span> <span class="n">position_distance</span> <span class="o">+</span> <span class="n">obj_gripper_height_diff</span><span class="p">)</span> <span class="o">+</span> <span class="n">firm_grasp</span> <span class="o">+</span> <span class="n">stable_grasp</span> <span class="o">+</span> <span class="n">distance_from_top_grasp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">after_grasp_poses</span><span class="p">[</span><span class="n">pose_id</span><span class="o">*</span><span class="mi">7</span><span class="p">:(</span><span class="n">pose_id</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">start_pos</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">start_ori</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;Total score: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">[</span><span class="n">pose_id</span><span class="p">]</span><span class="si">}</span>
+<span class="s2">                                    Angle from top grasp: </span><span class="si">{</span><span class="n">distance_from_top_grasp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span>
+<span class="s2">                                    Position change after grasp </span><span class="si">{</span><span class="n">grasp_position_change</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">mm</span>
+<span class="s2">                                    Height difference after rotation: </span><span class="si">{</span><span class="n">height_dif</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">mm</span>
+<span class="s2">                                    Position distance after rotation: </span><span class="si">{</span><span class="n">position_distance</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">mm</span>
+<span class="s2">                                    Relative height change after lift: </span><span class="si">{</span><span class="n">obj_gripper_height_diff</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">mm</span>
+<span class="s2">                                    Firm grasp: </span><span class="si">{</span><span class="n">firm_grasp</span><span class="si">}</span><span class="s2">, Stable grasp: </span><span class="si">{</span><span class="n">stable_grasp</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_info</span><span class="p">(</span><span class="s2">&quot;Press Q to end&quot;</span><span class="p">)</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">is_alive</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">last_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">last_key</span> <span class="o">==</span> <span class="s2">&quot;q&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">last_key</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">break</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="ClientProcess.handle_timeout"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.ClientProcess.handle_timeout">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">handle_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signum</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Raises timeout exception from signal alarm callback.</span>
+
+<span class="sd">        :param signum: POSIX signal number</span>
+<span class="sd">        :type signum: int</span>
+<span class="sd">        :param frame: interrupted frame</span>
+<span class="sd">        :type frame: Any</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">TimeoutError</span></div>
+
+<div class="viewcode-block" id="ClientProcess.run"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.ClientProcess.run">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executes grasp evaluation over all assigned poses.</span>
+
+<span class="sd">        :return: 0 when worker exits</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGALRM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_timeout</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">pose_id</span><span class="p">,</span> <span class="n">pose</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gripper_poses</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+                <span class="n">signal</span><span class="o">.</span><span class="n">alarm</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_grasp</span><span class="p">(</span><span class="n">pose</span><span class="p">,</span> <span class="n">pose_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;Timeout&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">signal</span><span class="o">.</span><span class="n">alarm</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="mi">0</span></div></div>
+
+
+<div class="viewcode-block" id="GraspGenerator"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.GraspGenerator">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GraspGenerator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;object_0.obj&quot;</span><span class="p">,</span> <span class="n">init_position</span><span class="p">:</span> <span class="n">Vector3</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="n">config_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default.yaml&quot;</span><span class="p">,</span> <span class="n">ros</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates grasp candidates and prepares simulation resources.</span>
+
+<span class="sd">        :param object_name: object mesh name or path</span>
+<span class="sd">        :type object_name: str, optional, default=&quot;object_0.obj&quot;</span>
+<span class="sd">        :param init_position: initial object position in world coordinates</span>
+<span class="sd">        :type init_position: list[float] | np.ndarray, optional, default=[0, 0, 0]</span>
+<span class="sd">        :param config_name: configuration file name or path</span>
+<span class="sd">        :type config_name: str, optional, default=&quot;default.yaml&quot;</span>
+<span class="sd">        :param ros: whether ROS message types should be used</span>
+<span class="sd">        :type ros: bool, optional, default=True</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ros</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">geometry_msgs.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pose</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Quaternion</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_grasper.srv</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenerateGraspsResponse</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_grasper.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pose</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Quaternion</span><span class="p">,</span> <span class="n">GenerateGraspsResponse</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">PoseImport</span> <span class="o">=</span> <span class="n">Pose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PointImport</span> <span class="o">=</span> <span class="n">Point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">QuaternionImport</span> <span class="o">=</span> <span class="n">Quaternion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GenerateGraspsResponseImport</span> <span class="o">=</span> <span class="n">GenerateGraspsResponse</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">config_name</span><span class="p">,</span><span class="n">object_name</span><span class="o">=</span><span class="n">object_name</span><span class="p">,</span> <span class="n">init_position</span><span class="o">=</span><span class="n">init_position</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Fixed value without config setting</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">ros</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ros</span> <span class="o">=</span> <span class="n">ros</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">gripper</span> <span class="o">==</span> <span class="s2">&quot;barrett&quot;</span><span class="p">:</span>
+            <span class="n">gripper_f</span> <span class="o">=</span> <span class="n">Barrett</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">gripper</span> <span class="o">==</span> <span class="s2">&quot;robotiq&quot;</span><span class="p">:</span>
+            <span class="n">gripper_f</span> <span class="o">=</span> <span class="n">Robotiq_2f_85</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span> <span class="o">=</span> <span class="n">gripper_f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gripper_mesh</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">TriangleMesh</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fingers_mesh</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">TriangleMesh</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plane_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_gripper</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gripper_poses</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># self.client.visualizer = Visualizer(self.client, True)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">pc</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">R_old</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">point</span><span class="p">,</span> <span class="n">normal</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">pc</span><span class="o">.</span><span class="n">normals</span><span class="p">)):</span>
+
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">-</span><span class="n">normal</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s2">&quot;This happened&quot;</span><span class="p">)</span>
+                <span class="n">Q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rotAngle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+                <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+                <span class="n">rotAxis</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">)</span>
+                <span class="n">rot_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rotAxis</span><span class="p">)</span> <span class="o">*</span> <span class="n">rotAngle</span>
+                <span class="n">Q</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><span class="n">rot_vec</span><span class="p">)</span><span class="o">.</span><span class="n">as_quat</span><span class="p">()</span>
+            <span class="n">rot_vec</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">rot</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><span class="n">rot_vec</span><span class="p">)</span><span class="o">.</span><span class="n">as_quat</span><span class="p">()</span>
+            <span class="n">Q2</span> <span class="o">=</span> <span class="n">quaternion_multiply</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span>
+
+            <span class="n">rot_vec</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+            <span class="n">rot</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><span class="n">rot_vec</span><span class="p">)</span><span class="o">.</span><span class="n">as_quat</span><span class="p">()</span>
+            <span class="n">Q3</span> <span class="o">=</span> <span class="n">quaternion_multiply</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span>
+
+
+            <span class="n">pose_added</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Q</span><span class="p">,</span> <span class="n">Q2</span><span class="p">,</span> <span class="n">Q3</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">pose_added</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">]:</span>  <span class="c1"># [0.10, 0.11, 0.12]</span>
+                    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+                    <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">from_quat</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+                    <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">point</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">*</span> <span class="n">normal</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">gripper_mesh</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">R</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R_old</span><span class="p">))</span>
+
+                    <span class="n">R_old</span> <span class="o">=</span> <span class="n">R</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gripper_mesh</span><span class="o">.</span><span class="n">is_intersecting</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gripper_mesh</span><span class="o">.</span><span class="n">is_intersecting</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plane_mesh</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">move_to_grasp_pose</span><span class="p">:</span>
+                            <span class="n">offset</span> <span class="o">+=</span> <span class="mf">0.1</span>
+                        <span class="n">point_</span> <span class="o">=</span> <span class="n">point</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">*</span> <span class="n">normal</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">gripper_poses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PoseImport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PointImport</span><span class="p">(</span><span class="o">*</span><span class="n">point_</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">QuaternionImport</span><span class="p">(</span><span class="o">*</span><span class="n">q</span><span class="p">)))</span>
+                        <span class="n">pose_added</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+
+        <span class="c1"># this is just pure guest that when the poses are randomized it will be better distributed along multiple cores</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gripper_poses</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gripper_poses</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of poses: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualization</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span> <span class="o">=</span> <span class="n">Visualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visualization</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_info</span><span class="p">(</span><span class="s2">&quot;Visualization enabled -&gt; only one proces is used&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="GraspGenerator.run"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.GraspGenerator.run">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">custom_pose</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs grasp evaluation either for all generated poses or one custom pose.</span>
+
+<span class="sd">        :param custom_pose: optional pose override for one-off evaluation</span>
+<span class="sd">        :type custom_pose: Any, optional, default=None</span>
+<span class="sd">        :return: grasp response with poses and quality metrics</span>
+<span class="sd">        :rtype: Any</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">processes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">custom_pose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gripper_poses</span> <span class="o">=</span> <span class="p">[</span><span class="n">custom_pose</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">debug_sleep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">debug_sleep_back</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span> <span class="o">=</span> <span class="n">Visualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">debug_sleep_back</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">debug_sleep</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">debug_sleep</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenerateGraspsResponseImport</span><span class="p">()</span>
+
+        <span class="n">num_proc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span><span class="p">])</span>
+        <span class="n">num_per_process</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span> <span class="o">//</span> <span class="n">num_proc</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">break_point</span> <span class="o">=</span> <span class="n">num_proc</span> <span class="o">-</span> <span class="p">(</span><span class="n">num_per_process</span> <span class="o">*</span> <span class="n">num_proc</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span><span class="p">)</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_proc</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">break_point</span><span class="p">:</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="n">num_per_process</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="n">num_per_process</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">poses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gripper_poses</span><span class="p">[</span><span class="n">last</span><span class="p">:</span><span class="n">last</span> <span class="o">+</span> <span class="n">shift</span><span class="p">]</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">last</span> <span class="o">+</span> <span class="n">shift</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">ClientProcess</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">poses</span><span class="p">,</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">poses</span><span class="p">))),</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">poses</span><span class="p">))))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_poses</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">poses</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">gripper_poses</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">qualities</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="k">return</span> <span class="n">out</span>
+            <span class="n">processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">gripper_poses</span><span class="p">)):</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">poses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">gripper_poses</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">qualities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">score</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">poses_after_grasps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">after_grasp_poses</span><span class="p">[</span><span class="n">idx</span><span class="o">*</span><span class="mi">7</span><span class="p">:(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">7</span><span class="p">])</span>
+
+        <span class="n">sort_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">qualities</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">poses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">poses</span><span class="p">)[</span><span class="n">sort_ids</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">qualities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">qualities</span><span class="p">)[</span><span class="n">sort_ids</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">poses_after_grasps</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">poses_after_grasps</span><span class="p">)[</span><span class="n">sort_ids</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="GraspGenerator.load_gripper"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.GraspGenerator.load_gripper">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_gripper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads and composes simplified gripper collision geometry for pre-checks.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">visualData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getVisualShapeData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">visualData</span><span class="p">:</span>
+            <span class="c1"># Get information about individual parts of the object</span>
+            <span class="n">f_path</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualShapeData</span><span class="p">[</span><span class="s2">&quot;FILE&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;visual&quot;</span><span class="p">,</span> <span class="s2">&quot;collision&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.obj&quot;</span><span class="p">,</span> <span class="s2">&quot;_vhacd.obj&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="s2">&quot;robotiq_arg2f_85_pad&quot;</span> <span class="ow">in</span> <span class="n">f_path</span> <span class="ow">or</span> <span class="s2">&quot;contactile_vhacd&quot;</span> <span class="ow">in</span> <span class="n">f_path</span> <span class="ow">or</span> <span class="s2">&quot;finger_tip&quot;</span> <span class="ow">in</span> <span class="n">f_path</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualShapeData</span><span class="p">[</span><span class="s2">&quot;LINK&quot;</span><span class="p">]]</span>
+
+            <span class="c1"># non-base links</span>
+            <span class="k">if</span> <span class="n">link</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># get link info</span>
+                <span class="n">linkState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">computeLinkVelocity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                     <span class="n">computeForwardKinematics</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1"># get orientation and position wrt URDF</span>
+                <span class="n">ori</span> <span class="o">=</span> <span class="n">linkState</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">linkInfo</span><span class="p">[</span><span class="s2">&quot;URDFORI&quot;</span><span class="p">]]</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">linkState</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">linkInfo</span><span class="p">[</span><span class="s2">&quot;URDFPOS&quot;</span><span class="p">]]</span>
+            <span class="c1"># link == -1 is base. For that, getBasePosition... needs to be used</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pos</span><span class="p">,</span> <span class="n">ori</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">gripper</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+            <span class="n">m</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_triangle_mesh</span><span class="p">(</span><span class="n">f_path</span><span class="p">)</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">from_quat</span><span class="p">(</span><span class="n">ori</span><span class="p">)</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+            <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pos</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s2">&quot;contactile_vhacd.obj&quot;</span> <span class="ow">in</span> <span class="n">f_path</span> <span class="ow">or</span> <span class="s2">&quot;finger_tip&quot;</span> <span class="ow">in</span> <span class="n">f_path</span><span class="p">:</span>
+                <span class="n">bbox</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">get_oriented_bounding_box</span><span class="p">()</span>
+                <span class="n">bbox</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">bbox</span><span class="o">.</span><span class="n">get_center</span><span class="p">())</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">TriangleMesh</span><span class="p">()</span><span class="o">.</span><span class="n">create_from_oriented_bounding_box</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">gripper_mesh</span> <span class="o">+=</span> <span class="n">m</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plane_mesh</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_triangle_mesh</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;objects&quot;</span><span class="p">,</span> <span class="s2">&quot;plane.obj&quot;</span><span class="p">))</span><span class="c1">#, [-5, -5, self.plane_lift]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plane_mesh</span><span class="o">.</span><span class="n">translate</span><span class="p">([</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">plane_lift</span><span class="p">],</span> <span class="n">relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="quaternion_multiply"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.quaternion_multiply">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">quaternion_multiply</span><span class="p">(</span><span class="n">q1</span><span class="p">:</span> <span class="n">Vector3</span><span class="p">,</span> <span class="n">q2</span><span class="p">:</span> <span class="n">Vector3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multiplies two quaternions [x, y, z, w].</span>
+
+<span class="sd">    :param q1: first quaternion</span>
+<span class="sd">    :type q1: list[float] | np.ndarray</span>
+<span class="sd">    :param q2: second quaternion</span>
+<span class="sd">    :type q2: list[float] | np.ndarray</span>
+<span class="sd">    :return: quaternion product [x, y, z, w]</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">z1</span><span class="p">,</span> <span class="n">w1</span> <span class="o">=</span> <span class="n">q1</span>
+    <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">z2</span><span class="p">,</span> <span class="n">w2</span> <span class="o">=</span> <span class="n">q2</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">x1</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">+</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z2</span> <span class="o">-</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">y2</span> <span class="o">+</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">x2</span><span class="p">,</span>
+        <span class="o">-</span><span class="n">x1</span> <span class="o">*</span> <span class="n">z2</span> <span class="o">+</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">+</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">+</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">y2</span><span class="p">,</span>
+        <span class="n">x1</span> <span class="o">*</span> <span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">+</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">+</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">z2</span><span class="p">,</span>
+        <span class="o">-</span><span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">-</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">y2</span> <span class="o">-</span> <span class="n">z1</span> <span class="o">*</span> <span class="n">z2</span> <span class="o">+</span> <span class="n">w1</span> <span class="o">*</span> <span class="n">w2</span>
+    <span class="p">])</span></div>
+
+<div class="viewcode-block" id="str_to_bool"><a class="viewcode-back" href="../../grasp_generator.html#pybullet_grasper.grasp_generator.str_to_bool">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">str_to_bool</span><span class="p">(</span><span class="n">str_bool</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a string value to boolean.</span>
+
+<span class="sd">    :param str_bool: string representation of boolean</span>
+<span class="sd">    :type str_bool: str</span>
+<span class="sd">    :return: True for common truthy values, otherwise False</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">str_bool</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

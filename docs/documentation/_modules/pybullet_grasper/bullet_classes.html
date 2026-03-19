@@ -1,0 +1,884 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybullet_grasper.bullet_classes &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Grasping with PyBullet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html#pybullet-grasper">pybullet_grasper</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybullet_grasper.bullet_classes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybullet_grasper.bullet_classes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes for pyBullet grasper containing the Client, Object and Robotiq 2F-85 Gripper and Barrett Hand</span>
+
+<span class="sd">:Author: Lukas Rustler</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_utils.bullet_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">BulletClient</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">open3d</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">o3d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_grasper.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">get_data_folder</span><span class="p">,</span> <span class="n">suppress_c_output</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+
+<span class="n">Vector3</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+<span class="n">Quaternion</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Client"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Client">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Client</span><span class="p">(</span><span class="n">BulletClient</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper around :class:`pybullet_utils.bullet_client.BulletClient` used by the grasper pipeline.</span>
+
+<span class="sd">    The class initializes the simulation world, loads the active graspable object,</span>
+<span class="sd">    and stores convenience indices for pyBullet tuple-based APIs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># As dict, because IntEnum is about 1.5-2x slower</span>
+    <span class="n">jointInfo</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;INDEX&quot;</span><span class="p">,</span> <span class="s2">&quot;NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;TYPE&quot;</span><span class="p">,</span> <span class="s2">&quot;QINDEX&quot;</span><span class="p">,</span> <span class="s2">&quot;UINDEX&quot;</span><span class="p">,</span> <span class="s2">&quot;FLAGS&quot;</span><span class="p">,</span> <span class="s2">&quot;DAMPING&quot;</span><span class="p">,</span>
+                                                   <span class="s2">&quot;FRICTION&quot;</span><span class="p">,</span> <span class="s2">&quot;LOWERLIMIT&quot;</span><span class="p">,</span> <span class="s2">&quot;UPPERLIMIT&quot;</span><span class="p">,</span> <span class="s2">&quot;MAXFORCE&quot;</span><span class="p">,</span> <span class="s2">&quot;MAXVELOCITY&quot;</span><span class="p">,</span>
+                                                   <span class="s2">&quot;LINKNAME&quot;</span><span class="p">,</span> <span class="s2">&quot;AXIS&quot;</span><span class="p">,</span> <span class="s2">&quot;PARENTPOS&quot;</span><span class="p">,</span> <span class="s2">&quot;PARENTORN&quot;</span><span class="p">,</span> <span class="s2">&quot;PARENTINDEX&quot;</span><span class="p">])}</span>
+    <span class="n">jointStates</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;POSITION&quot;</span><span class="p">,</span> <span class="s2">&quot;VELOCITY&quot;</span><span class="p">,</span> <span class="s2">&quot;FORCES&quot;</span><span class="p">,</span> <span class="s2">&quot;TORQUE&quot;</span><span class="p">])}</span>
+
+    <span class="n">linkInfo</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;WORLDPOS&quot;</span><span class="p">,</span> <span class="s2">&quot;WORLDORI&quot;</span><span class="p">,</span> <span class="s2">&quot;INERTIAPOS&quot;</span><span class="p">,</span> <span class="s2">&quot;INERTIAORI&quot;</span><span class="p">,</span> <span class="s2">&quot;URDFPOS&quot;</span><span class="p">,</span>
+                                                  <span class="s2">&quot;URDFORI&quot;</span><span class="p">,</span> <span class="s2">&quot;LINVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;ANGVEL&quot;</span><span class="p">])}</span>
+
+    <span class="n">contactPoints</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;FLAG&quot;</span><span class="p">,</span> <span class="s2">&quot;IDA&quot;</span><span class="p">,</span> <span class="s2">&quot;IDB&quot;</span><span class="p">,</span> <span class="s2">&quot;INDEXA&quot;</span><span class="p">,</span> <span class="s2">&quot;INDEXB&quot;</span><span class="p">,</span> <span class="s2">&quot;POSITIONA&quot;</span><span class="p">,</span>
+                                                       <span class="s2">&quot;POSITIONB&quot;</span><span class="p">,</span> <span class="s2">&quot;NORMAL&quot;</span><span class="p">,</span> <span class="s2">&quot;DISTANCE&quot;</span><span class="p">,</span> <span class="s2">&quot;FORCE&quot;</span><span class="p">,</span>
+                                                       <span class="s2">&quot;FRICTION1&quot;</span><span class="p">,</span> <span class="s2">&quot;FRICTIONDIR1&quot;</span><span class="p">,</span> <span class="s2">&quot;FRICTION2&quot;</span><span class="p">,</span> <span class="s2">&quot;FRICTIONDIR2&quot;</span><span class="p">])}</span>
+    <span class="n">dynamicsInfo</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;MASS&quot;</span><span class="p">,</span> <span class="s2">&quot;FRICTION&quot;</span><span class="p">,</span> <span class="s2">&quot;INTERTIADIAGONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;INERTIAPOS&quot;</span><span class="p">,</span> <span class="s2">&quot;INERTIAOR&quot;</span><span class="p">,</span>
+                                                      <span class="s2">&quot;RESTITUTION&quot;</span><span class="p">,</span> <span class="s2">&quot;ROLLINGFRICTION&quot;</span><span class="p">,</span> <span class="s2">&quot;SPINNINGFRICTION&quot;</span><span class="p">,</span> <span class="s2">&quot;DAMPING&quot;</span><span class="p">,</span>
+                                                      <span class="s2">&quot;STIFFNESS&quot;</span><span class="p">,</span> <span class="s2">&quot;BODYTYPE&quot;</span><span class="p">,</span> <span class="s2">&quot;MARGIN&quot;</span><span class="p">])}</span>
+    <span class="n">visualShapeData</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;LINK&quot;</span><span class="p">,</span> <span class="s2">&quot;GEOMTYPE&quot;</span><span class="p">,</span> <span class="s2">&quot;DIMS&quot;</span><span class="p">,</span> <span class="s2">&quot;FILE&quot;</span><span class="p">,</span> <span class="s2">&quot;POS&quot;</span><span class="p">,</span> <span class="s2">&quot;ORI&quot;</span><span class="p">,</span>
+                                                         <span class="s2">&quot;COLOR&quot;</span><span class="p">,</span> <span class="s2">&quot;TEXTURE&quot;</span><span class="p">])}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">object_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">init_position</span><span class="p">:</span> <span class="n">Vector3</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Client class which inherits from BulletClient. Runs the physics client with desired mode and prepares dicts</span>
+<span class="sd">        for easier access to things</span>
+
+<span class="sd">        :param config_path: path to the config file</span>
+<span class="sd">        :type config_path: str</span>
+<span class="sd">        :param object_name: name of the object; can be relative to the calling script; relative to source_code/objects or an absolute path</span>
+<span class="sd">        :type object_name: str, optional, default=&quot;&quot;</span>
+<span class="sd">        :param init_position: initial position of the object</span>
+<span class="sd">        :type init_position: list[float] | np.ndarray, optional, default=[0, 0, 0]</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DIRECT</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPhysicsEngineParameter</span><span class="p">(</span><span class="n">deterministicOverlappingPairs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configureDebugVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">COV_ENABLE_RGB_BUFFER_PREVIEW</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configureDebugVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">COV_ENABLE_DEPTH_BUFFER_PREVIEW</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configureDebugVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">COV_ENABLE_SEGMENTATION_MARK_PREVIEW</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGravity</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">9.81</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gripper</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grasper</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_step</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_render</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plane_lift</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">get_data_folder</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plane</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadURDF</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;urdf&quot;</span><span class="p">,</span> <span class="s2">&quot;plane.urdf&quot;</span><span class="p">),</span> <span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plane_lift</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;urdf&quot;</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;urdf&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">config_path</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">c_path</span> <span class="ow">in</span> <span class="p">[</span><span class="n">config_path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span><span class="p">),</span> <span class="n">config_path</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;configs&quot;</span><span class="p">,</span> <span class="n">config_path</span><span class="p">)]:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">c_path</span><span class="p">):</span>
+                    <span class="n">config_path</span> <span class="o">=</span> <span class="n">c_path</span>
+                    <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">debug</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualization_objects</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">plane</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">object_name</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">o_path</span> <span class="ow">in</span> <span class="p">[</span><span class="n">object_name</span><span class="p">,</span>
+                           <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span><span class="p">),</span> <span class="n">object_name</span><span class="p">),</span>
+                           <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;objects&quot;</span><span class="p">,</span> <span class="n">object_name</span><span class="p">)]:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">o_path</span><span class="p">):</span>
+                    <span class="n">object_name</span> <span class="o">=</span> <span class="n">o_path</span>
+                    <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_objects</span><span class="p">(</span><span class="n">object_name</span><span class="p">,</span> <span class="n">init_position</span><span class="p">)</span>
+        <span class="c1"># default 1/240</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTimeStep</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Client.step_simulation"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Client.step_simulation">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">step_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sleep_duration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the simulation</span>
+
+<span class="sd">        :param sleep_duration: duration to sleep before the next simulation step</span>
+<span class="sd">        :type sleep_duration: float, optional, default=None</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="ow">and</span> <span class="n">sleep_duration</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">debug_sleep</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sleep_duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">debug_sleep</span>
+
+        <span class="c1"># This is here to keep events and everything in open3D work even if we want slower simulation</span>
+        <span class="k">if</span> <span class="n">sleep_duration</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_step</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">sleep_duration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stepSimulation</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_step</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">visualizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_render</span> <span class="o">&gt;</span> <span class="mf">0.01</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">is_alive</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_render</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Client.reset"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Client.reset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to reset simulation to default state</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetSimulation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPhysicsEngineParameter</span><span class="p">(</span><span class="n">deterministicOverlappingPairs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGravity</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">9.81</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTimeStep</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plane</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadURDF</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;urdf&quot;</span><span class="p">,</span> <span class="s2">&quot;plane.urdf&quot;</span><span class="p">),</span> <span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plane_lift</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualization_objects</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">plane</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_objects</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Client.is_alive"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Client.is_alive">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether the engine is still running</span>
+
+<span class="sd">        :return: True when running</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Client.load_objects"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Client.load_objects">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">init_position</span><span class="p">:</span> <span class="n">Vector3</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load graspable objects. With possibility of convex decomposition with V-HACD</span>
+
+<span class="sd">        :param path: path to the mesh</span>
+<span class="sd">        :type path: str, optional, default=&quot;&quot;</span>
+<span class="sd">        :param init_position: initial position of the object</span>
+<span class="sd">        :type init_position: list[float] | np.ndarray, optional, default=[0, 0, 0]</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">GraspableBody</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_position</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">prepare_body</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="n">g</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">prepare_body</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualization_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Client.read_info"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Client.read_info">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add mesh to the visualizer</span>
+
+<span class="sd">        :param obj_id: id of the object; given by pybullet</span>
+<span class="sd">        :type obj_id: int</span>
+<span class="sd">        :return: 0 for success</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">visualData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getVisualShapeData</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">visualData</span><span class="p">:</span>
+            <span class="c1"># Get information about individual parts of the object</span>
+            <span class="n">f_path</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">visualShapeData</span><span class="p">[</span><span class="s2">&quot;FILE&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="c1">#.replace(&quot;visual&quot;, &quot;collision&quot;).replace(&quot;.obj&quot;, &quot;_vhacd.obj&quot;)</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">visualShapeData</span><span class="p">[</span><span class="s2">&quot;COLOR&quot;</span><span class="p">]]</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">visualShapeData</span><span class="p">[</span><span class="s2">&quot;LINK&quot;</span><span class="p">]]</span>
+
+            <span class="c1"># non-base links</span>
+            <span class="k">if</span> <span class="n">link</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># get link info</span>
+                <span class="n">linkState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">computeLinkVelocity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                     <span class="n">computeForwardKinematics</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1"># get orientation and position wrt URDF</span>
+                <span class="n">ori</span> <span class="o">=</span> <span class="n">linkState</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">linkInfo</span><span class="p">[</span><span class="s2">&quot;URDFORI&quot;</span><span class="p">]]</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">linkState</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">linkInfo</span><span class="p">[</span><span class="s2">&quot;URDFPOS&quot;</span><span class="p">]]</span>
+            <span class="c1"># link == -1 is base. For that, getBasePosition... needs to be used</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pos</span><span class="p">,</span> <span class="n">ori</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="n">pos</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">ori</span> <span class="o">+=</span> <span class="n">ori</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">colors</span> <span class="o">+=</span> <span class="n">col</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Client.lower_the_plane"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Client.lower_the_plane">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">lower_the_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Moves the support plane joint to the requested position.</span>
+
+<span class="sd">        :param target: desired prismatic joint position of the plane</span>
+<span class="sd">        :type target: float</span>
+<span class="sd">        :return: 0 when target is reached, -1 when timeout is reached</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plane</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetPosition</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+                                   <span class="n">maxVelocity</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">start_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_done</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getJointState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plane</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-3</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">-</span> <span class="n">start_steps</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">time_step</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="GraspableBody"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.GraspableBody">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GraspableBody</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stores geometry, sampling and runtime metadata for one graspable object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span> <span class="n">init_position</span><span class="p">:</span> <span class="n">Vector3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes an empty graspable object container.</span>
+
+<span class="sd">        :param client: active physics client</span>
+<span class="sd">        :type client: Client</span>
+<span class="sd">        :param init_position: initial translation used when loading the object</span>
+<span class="sd">        :type init_position: list[float] | np.ndarray</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_original</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;object&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_pos</span> <span class="o">=</span> <span class="n">init_position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_ori</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="GraspableBody.prepare_body"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.GraspableBody.prepare_body">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepare_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">do_init</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load graspable objects. With possibility of convex decomposition with V-HACD</span>
+
+<span class="sd">        :param model: path to the .obj file</span>
+<span class="sd">        :type model: str</span>
+<span class="sd">        :param do_init: whether to regenerate VHACD/URDF assets before loading</span>
+<span class="sd">        :type do_init: bool, optional, default=True</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">do_init</span><span class="p">:</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.obj&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">model_vhacd</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.obj&quot;</span><span class="p">,</span> <span class="s2">&quot;_vhacd.obj&quot;</span><span class="p">)</span>
+            <span class="c1">#if not os.path.exists(model.replace(&quot;.obj&quot;, &quot;_vhacd.obj&quot;)):</span>
+            <span class="k">with</span> <span class="n">suppress_c_output</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">vhacd</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model_vhacd</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span><span class="c1">#, resolution=10000, maxNumVerticesPerCH=1, gamma=0.0005, concavity=0)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prepare_mesh</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;urdf&quot;</span><span class="p">,</span> <span class="s2">&quot;object_default.urdf&quot;</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">urdf</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">urdf</span> <span class="o">=</span> <span class="n">urdf</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;OBJECTNAME&quot;</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;LATERALFRICTION&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span> \
+                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;ROLLINGFRICTION&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;MASS&quot;</span><span class="p">,</span> <span class="s2">&quot;0.5&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;FILENAMEVHACD&quot;</span><span class="p">,</span> <span class="n">model_vhacd</span><span class="p">)</span> \
+                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;FILENAME&quot;</span><span class="p">,</span> <span class="n">model_vhacd</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;objects&quot;</span><span class="p">,</span> <span class="s2">&quot;urdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.obj&quot;</span><span class="p">,</span> <span class="s2">&quot;.urdf&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">urdf</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">obj_path</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;objects&quot;</span><span class="p">,</span> <span class="s2">&quot;urdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.obj&quot;</span><span class="p">,</span> <span class="s2">&quot;.urdf&quot;</span><span class="p">)</span> <span class="c1"># this is only needed for easier reset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">loadURDF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_ori</span><span class="p">,</span> <span class="n">useFixedBase</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="c1">#, flags=self.client.URDF_USE_INERTIA_FROM_FILE)</span></div>
+
+<div class="viewcode-block" id="GraspableBody.prepare_mesh"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.GraspableBody.prepare_mesh">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepare_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepares information about the object</span>
+
+<span class="sd">        :param model: path to the .obj file</span>
+<span class="sd">        :type model: str</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_original</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_triangle_mesh</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_triangle_mesh</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.obj&quot;</span><span class="p">,</span> <span class="s2">&quot;_vhacd.obj&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_original</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init_pos</span><span class="p">,</span> <span class="n">relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init_pos</span><span class="p">,</span> <span class="n">relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># self.vertices = np.asarray(self.mesh.vertices)</span>
+        <span class="c1"># self.client.plane_lift = np.min(self.vertices[:, 2])-0.01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">plane_lift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_axis_aligned_bounding_box</span><span class="p">()</span><span class="o">.</span><span class="n">get_min_bound</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mf">0.005</span>
+        <span class="n">box_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_original</span><span class="o">.</span><span class="n">get_axis_aligned_bounding_box</span><span class="p">()</span><span class="o">.</span><span class="n">get_box_points</span><span class="p">())</span>
+        <span class="c1"># box_points[np.abs(box_points[:, 2] - np.min(box_points[:, 2])) &lt; 1e-5, 2] += np.min([0.075, height/2])</span>
+
+        <span class="n">crop_box</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">OrientedBoundingBox</span><span class="o">.</span><span class="n">create_from_points</span><span class="p">(</span><span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3dVector</span><span class="p">(</span><span class="n">box_points</span><span class="p">))</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">500</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_original</span><span class="o">.</span><span class="n">get_surface_area</span><span class="p">()</span><span class="o">*</span><span class="mi">10000</span><span class="p">)]),</span> <span class="mi">250</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_original</span><span class="o">.</span><span class="n">sample_points_uniformly</span><span class="p">(</span><span class="n">number_of_points</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="o">.</span><span class="n">estimate_normals</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="o">.</span><span class="n">orient_normals_consistent_tangent_plane</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="o">.</span><span class="n">normalize_normals</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="o">.</span><span class="n">crop</span><span class="p">(</span><span class="n">crop_box</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertices</span><span class="p">)</span>
+        <span class="n">bounding_points_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+        <span class="n">bounding_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">bounding_points_indexes</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_center</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">bounding_points</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="Robotiq_2f_85"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Robotiq_2f_85</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runtime controller for the Robotiq 2F-85 gripper loaded in pyBullet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">JOINTS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;left_inner_knuckle_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;left_inner_finger_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;right_outer_knuckle_joint&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;right_inner_knuckle_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;right_inner_finger_joint&quot;</span><span class="p">]</span>
+    <span class="n">SIGNS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">Vector3</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Quaternion</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for the Robotiq 2f-85 gripper</span>
+
+<span class="sd">        :param client: instance of Client, holding info about the scene</span>
+<span class="sd">        :type client: Client</span>
+<span class="sd">        :param position: spawn position of the gripper base in world frame</span>
+<span class="sd">        :type position: list[float] | np.ndarray, optional, default=[0, 0, 1]</span>
+<span class="sd">        :param orientation: spawn orientation quaternion of the gripper base</span>
+<span class="sd">        :type orientation: list[float] | np.ndarray, optional, default=[0, 0, 0, 1]</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_gripper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_gripper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;gripper&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_force</span> <span class="o">=</span> <span class="mi">185</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualization_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_gripper_pose</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1">#TODO: just test</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height_diff</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Robotiq_2f_85.load_gripper"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.load_gripper">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_gripper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads the grippers URDF into the scene</span>
+
+<span class="sd">        :return: body id of the loaded gripper</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Path needs to be changed to load the meshes correctly</span>
+
+        <span class="n">gripper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">loadURDF</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;grippers/robotiq_2f_85/robotiq_2f_85_contactile.urdf&quot;</span><span class="p">),</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
+                                       <span class="n">useFixedBase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                       <span class="n">flags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">URDF_USE_INERTIA_FROM_FILE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gripper</span></div>
+
+<div class="viewcode-block" id="Robotiq_2f_85.prepare_gripper"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.prepare_gripper">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepare_gripper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets constraints for joints to works as mimic joint in URDF</span>
+
+<span class="sd">        :return: created constraints, driver joint id, and driver joint info tuple</span>
+<span class="sd">        :rtype: tuple[list, int, tuple]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># find ids of the 6 articulated joints</span>
+        <span class="n">joints_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">finger_joint_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getNumJoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)):</span>
+            <span class="n">j_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">idx</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;UTF-8&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;finger_joint&quot;</span> <span class="o">==</span> <span class="n">j_name</span><span class="p">:</span>
+                <span class="n">finger_joint_id</span> <span class="o">=</span> <span class="n">idx</span>
+            <span class="k">if</span> <span class="n">j_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">JOINTS</span><span class="p">:</span>
+                <span class="n">joints_ids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j_name</span><span class="p">,</span> <span class="n">idx</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">finger_joint_id</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Finger joint not found in the URDF&quot;</span>
+        <span class="n">finger_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">finger_joint_id</span><span class="p">)</span>
+
+        <span class="c1"># Set constraints -&gt; only one joint (finger_joint) is articulated in reality and 5 others should follow it</span>
+        <span class="c1"># Set a gear constraint</span>
+        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">joints_ids</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">joint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIGNS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">JOINTS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">joint</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+            <span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">createConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">finger_joint_id</span><span class="p">,</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span>
+                                                            <span class="n">jointType</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">JOINT_GEAR</span><span class="p">,</span>
+                                                            <span class="n">jointAxis</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                            <span class="n">parentFramePosition</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                            <span class="n">childFramePosition</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+
+            <span class="c1"># Some have different direction, because of axes settings etc.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">changeConstraint</span><span class="p">(</span><span class="n">constraints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">gearRatio</span><span class="o">=-</span><span class="n">s</span><span class="p">,</span>  <span class="c1"># +1 in gear ratio means reverse direction</span>
+                                         <span class="n">maxForce</span><span class="o">=</span><span class="mi">185</span><span class="p">,</span> <span class="n">erp</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># This needs to be done, otherwise the joints are not moving properly</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getNumJoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetVelocity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">constraints</span><span class="p">,</span> <span class="n">finger_joint_id</span><span class="p">,</span> <span class="n">finger_info</span></div>
+
+<div class="viewcode-block" id="Robotiq_2f_85.move"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.move">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move joint to target position</span>
+
+<span class="sd">        :param joint: id of the joint</span>
+<span class="sd">        :type joint: int</span>
+<span class="sd">        :param target: target position</span>
+<span class="sd">        :type target: float</span>
+<span class="sd">        :param velocity: maximum joint speed during the move command</span>
+<span class="sd">        :type velocity: float, optional, default=0.1</span>
+<span class="sd">        :return: 0 when target is reached, -1 when timeout is reached</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">joint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetPosition</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+                                          <span class="n">maxVelocity</span><span class="o">=</span><span class="n">velocity</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_force</span><span class="p">)</span>
+
+        <span class="n">start_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">joint</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-3</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">-</span> <span class="n">start_steps</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">time_step</span><span class="o">*</span><span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Robotiq_2f_85.reset_joints"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_joints">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">reset_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset gripper joints to default</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getNumJoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">resetJointState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Robotiq_2f_85.reset_constraints"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_constraints">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">reset_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove all constraints</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">removeConstraint</span><span class="p">(</span><span class="n">c</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Robotiq_2f_85.stop"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.stop">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Holds the current finger joint position using position control.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_id</span><span class="p">,</span>
+                                          <span class="n">controlMode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetPosition</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                                          <span class="n">force</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_force</span><span class="p">,</span>
+                                          <span class="n">maxVelocity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">finger_info</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">jointInfo</span><span class="p">[</span><span class="s2">&quot;MAXVELOCITY&quot;</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="Robotiq_2f_85.set_gripper_pose"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.set_gripper_pose">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_gripper_pose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set goal position of gripper</span>
+
+<span class="sd">        :param position: position of the gripper, 0 - closed, 1-open</span>
+<span class="sd">        :type position: float</span>
+<span class="sd">        :param wait: whether to wait for the motion to finish</span>
+<span class="sd">        :type wait: bool, optional, default=False</span>
+<span class="sd">        :return: motion result code, or 0 when command is issued without waiting</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">position</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Gripper position must be between 0 and 1&quot;</span>
+
+        <span class="c1"># fitted from data</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="mf">0.00499187</span> <span class="o">+</span> <span class="mf">0.68547417</span> <span class="o">*</span> <span class="n">position</span> <span class="o">+</span> <span class="mf">0.10344773</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_id</span><span class="p">,</span>
+                                          <span class="n">controlMode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetPosition</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                                          <span class="n">force</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_force</span><span class="p">,</span> <span class="c1">#self.finger_info[self.client.jointInfo[&quot;MAXFORCE&quot;]],</span>
+                                          <span class="n">maxVelocity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">finger_info</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">jointInfo</span><span class="p">[</span><span class="s2">&quot;MAXVELOCITY&quot;</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="k">if</span> <span class="n">wait</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">motion_done</span><span class="p">(</span><span class="n">object_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                     <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">detection_method</span><span class="p">,</span>
+                                     <span class="n">contact_threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">contact_threshold</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">r</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Robotiq_2f_85.motion_done"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.motion_done">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">motion_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="n">object_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;force&quot;</span><span class="p">,</span> <span class="n">contact_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether gripper is in goal position</span>
+
+<span class="sd">        :param eps: tolerance around the commanded joint value</span>
+<span class="sd">        :type eps: float, optional, default=1e-2</span>
+<span class="sd">        :param object_id: kept for API compatibility with other detectors</span>
+<span class="sd">        :type object_id: int, optional, default=-1</span>
+<span class="sd">        :param method: kept for API compatibility with other detectors</span>
+<span class="sd">        :type method: str, optional, default=&quot;force&quot;</span>
+<span class="sd">        :param contact_threshold: torque threshold used to classify object contact</span>
+<span class="sd">        :type contact_threshold: float, optional, default=10</span>
+<span class="sd">        :return: 1 for normal closure, 2 for collision, 3 for timeout, 0 for no closure</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>  <span class="c1"># sow start of the gripper jaws</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">time_step</span><span class="o">*</span><span class="mi">2</span><span class="p">:</span>  <span class="c1"># do one second of simulated time only</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">return</span> <span class="mi">3</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_force</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">contact_threshold</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="mi">0</span></div></div>
+
+
+<div class="viewcode-block" id="Barrett"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Barrett">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Barrett</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runtime controller for the Barrett Hand gripper loaded in pyBullet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">JOINTS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bh_j32_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;bh_j12_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;bh_j22_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;bh_j11_joint&quot;</span><span class="p">]</span> <span class="c1"># moveable joints</span>
+    <span class="n">MIMICS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;bh_j32_joint&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3442622950819672</span><span class="p">,</span> <span class="s2">&quot;bh_j33_joint&quot;</span><span class="p">],</span> <span class="s2">&quot;bh_j12_joint&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3442622950819672</span><span class="p">,</span> <span class="s2">&quot;bh_j13_joint&quot;</span><span class="p">],</span>
+              <span class="s2">&quot;bh_j22_joint&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3442622950819672</span><span class="p">,</span> <span class="s2">&quot;bh_j23_joint&quot;</span><span class="p">],</span> <span class="s2">&quot;bh_j11_joint&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;bh_j21_joint&quot;</span><span class="p">]}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">Vector3</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Quaternion</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for the Barrett Hand gripper</span>
+
+<span class="sd">        :param client: instance of Client, holding info about the scene</span>
+<span class="sd">        :type client: Client</span>
+<span class="sd">        :param position: spawn position of the gripper base in world frame</span>
+<span class="sd">        :type position: list[float] | np.ndarray, optional, default=[0, 0, 1]</span>
+<span class="sd">        :param orientation: spawn orientation quaternion of the gripper base</span>
+<span class="sd">        :type orientation: list[float] | np.ndarray, optional, default=[0, 0, 0, 1]</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_gripper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualization_objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingers_info</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joints_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_gripper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;gripper&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_force</span> <span class="o">=</span> <span class="mi">120</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+<div class="viewcode-block" id="Barrett.load_gripper"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.load_gripper">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_gripper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads the grippers URDF into the scene</span>
+
+<span class="sd">        :return: body id of the loaded gripper</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Path needs to be changed to load the meshes correctly</span>
+
+        <span class="n">gripper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">loadURDF</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;grippers/barrett_hand/barrett_hand.urdf&quot;</span><span class="p">),</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
+                                       <span class="n">useFixedBase</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                       <span class="n">flags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">URDF_USE_INERTIA_FROM_FILE</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gripper</span></div>
+
+<div class="viewcode-block" id="Barrett.prepare_gripper"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.prepare_gripper">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepare_gripper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets constraints for joints to works as mimic joint in URDF</span>
+
+<span class="sd">        :return: created constraints, moveable joint ids, joint info, and joint names</span>
+<span class="sd">        :rtype: tuple[list, list, list, list]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># find ids of the 6 articulated joints</span>
+        <span class="n">joints_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">moveable_joint_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fingers_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">finger_joints_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getNumJoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)):</span>
+            <span class="n">j_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">idx</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;UTF-8&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">j_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">JOINTS</span><span class="p">:</span>
+                <span class="n">moveable_joint_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+                <span class="n">finger_joints_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j_name</span><span class="p">)</span>
+                <span class="n">fingers_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">idx</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">idxx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getNumJoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)):</span>
+                    <span class="n">j_namee</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">idxx</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;UTF-8&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">j_namee</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">MIMICS</span><span class="p">[</span><span class="n">j_name</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">break</span>
+                <span class="n">joints_ids</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">idx</span><span class="p">,</span> <span class="n">idxx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MIMICS</span><span class="p">[</span><span class="n">j_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="c1"># Set constraints -&gt; only one joint (finger_joint) is articulated in reality and 5 others should follow it</span>
+        <span class="c1"># Set a gear constraint</span>
+        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">joint1</span><span class="p">,</span> <span class="n">joint2</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">joints_ids</span><span class="p">:</span>
+            <span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">createConstraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">joint1</span><span class="p">,</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">joint2</span><span class="p">,</span>
+                                                            <span class="n">jointType</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">JOINT_GEAR</span><span class="p">,</span>
+                                                            <span class="n">jointAxis</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                            <span class="n">parentFramePosition</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                            <span class="n">childFramePosition</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+
+            <span class="c1"># Some have different direction, because of axes settings etc.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">changeConstraint</span><span class="p">(</span><span class="n">constraints</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">gearRatio</span><span class="o">=-</span><span class="mi">1</span><span class="o">/</span><span class="n">s</span><span class="p">,</span>  <span class="c1"># +1 in gear ratio means reverse direction</span>
+                                         <span class="n">maxForce</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">erp</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">joint2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetVelocity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">constraints</span><span class="p">,</span> <span class="n">moveable_joint_ids</span><span class="p">,</span> <span class="n">fingers_info</span><span class="p">,</span> <span class="n">finger_joints_names</span></div>
+
+<div class="viewcode-block" id="Barrett.reset_constraints"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.reset_constraints">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">reset_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove all constraints</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">removeConstraint</span><span class="p">(</span><span class="n">c</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Barrett.stop"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.stop">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Holds all actuated finger joints at their current positions.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">finger_joint_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_ids</span><span class="p">):</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">finger_joint_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">finger_joint_id</span><span class="p">,</span>
+                                              <span class="n">controlMode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetPosition</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                                              <span class="n">force</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fingers_info</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">jointInfo</span><span class="p">[</span><span class="s2">&quot;MAXFORCE&quot;</span><span class="p">]],</span>
+                                              <span class="n">maxVelocity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fingers_info</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">jointInfo</span><span class="p">[</span><span class="s2">&quot;MAXVELOCITY&quot;</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="Barrett.set_gripper_pose"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.set_gripper_pose">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_gripper_pose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set goal position of gripper</span>
+
+<span class="sd">        :param position: position of the gripper</span>
+<span class="sd">        :type position: float</span>
+<span class="sd">        :param pose: 0 for two-finger mode, 1 to fold one finger out of the way</span>
+<span class="sd">        :type pose: int, optional, default=0</span>
+<span class="sd">        :param velocity: unused placeholder for API compatibility</span>
+<span class="sd">        :type velocity: float | None, optional, default=None</span>
+<span class="sd">        :param wait: whether to wait for the motion to finish</span>
+<span class="sd">        :type wait: bool, optional, default=False</span>
+<span class="sd">        :return: motion result code, or 0 when command is issued without waiting</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">position</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Gripper width must be between 0 and 1&quot;</span>
+        <span class="n">joints_min</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">joint_max</span> <span class="o">=</span> <span class="mf">2.44</span>
+
+        <span class="c1"># pose 0 = two finger</span>
+        <span class="c1"># pose 1 = &#39;one&#39; finger</span>
+
+        <span class="n">info_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joints_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;bh_j11_joint&quot;</span><span class="p">)</span>
+        <span class="n">finger_joint_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_ids</span><span class="p">[</span><span class="n">info_id</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pose</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">third_finger_position</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="k">elif</span> <span class="n">pose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">third_finger_position</span> <span class="o">=</span> <span class="mf">3.14</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">finger_joint_id</span><span class="p">,</span>
+                                          <span class="n">controlMode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetPosition</span><span class="o">=</span><span class="n">third_finger_position</span><span class="p">,</span>
+                                          <span class="n">force</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_force</span><span class="p">,</span>
+                                          <span class="n">maxVelocity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fingers_info</span><span class="p">[</span><span class="n">info_id</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">jointInfo</span><span class="p">[</span><span class="s2">&quot;MAXVELOCITY&quot;</span><span class="p">]])</span>
+
+        <span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">position</span> <span class="o">-</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">0</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">joint_max</span> <span class="o">-</span> <span class="n">joints_min</span><span class="p">)</span> <span class="o">+</span> <span class="n">joints_min</span>
+        <span class="k">for</span> <span class="n">finger_joint_id</span><span class="p">,</span> <span class="n">finger_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joints_names</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">finger_name</span> <span class="o">==</span> <span class="s2">&quot;bh_j11_joint&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">info_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joints_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">finger_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">finger_joint_id</span><span class="p">,</span>
+                                              <span class="n">controlMode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetPosition</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                                              <span class="n">force</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_force</span><span class="p">,</span> <span class="c1">#self.finger_info[self.client.jointInfo[&quot;MAXFORCE&quot;]],</span>
+                                              <span class="n">maxVelocity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fingers_info</span><span class="p">[</span><span class="n">info_id</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">jointInfo</span><span class="p">[</span><span class="s2">&quot;MAXVELOCITY&quot;</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="k">if</span> <span class="n">wait</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">motion_done</span><span class="p">(</span><span class="n">object_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                     <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">detection_method</span><span class="p">,</span>
+                                     <span class="n">contact_threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">contact_threshold</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">r</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Barrett.motion_done"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.motion_done">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">motion_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="n">object_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;force&quot;</span><span class="p">,</span> <span class="n">contact_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether gripper is in goal position</span>
+
+<span class="sd">        :param eps: tolerance around the commanded joint value</span>
+<span class="sd">        :type eps: float, optional, default=1e-2</span>
+<span class="sd">        :param object_id: kept for API compatibility with other detectors</span>
+<span class="sd">        :type object_id: int, optional, default=-1</span>
+<span class="sd">        :param method: kept for API compatibility with other detectors</span>
+<span class="sd">        :type method: str, optional, default=&quot;force&quot;</span>
+<span class="sd">        :param contact_threshold: torque threshold used to classify object contact</span>
+<span class="sd">        :type contact_threshold: float, optional, default=10</span>
+<span class="sd">        :return: 1 for normal closure, 2 for collision, 3 for timeout, 0 for no closure</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>  <span class="c1"># sow start of the gripper jaws</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">time_step</span><span class="o">*</span><span class="mi">2</span><span class="p">:</span>  <span class="c1"># do one second of simulated time only</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">return</span> <span class="mi">3</span>
+
+
+        <span class="k">for</span> <span class="n">finger_joint_id</span><span class="p">,</span> <span class="n">finger_joint_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finger_joint_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finger_joints_names</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">finger_joint_name</span> <span class="o">==</span> <span class="s2">&quot;bh_j11_joint&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">finger_joint_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_goal</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_force</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">contact_threshold</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Barrett.move"><a class="viewcode-back" href="../../bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.move">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move joint to target position</span>
+
+<span class="sd">        :param joint: id of the joint</span>
+<span class="sd">        :type joint: int</span>
+<span class="sd">        :param target: target position</span>
+<span class="sd">        :type target: float</span>
+<span class="sd">        :param velocity: maximum joint speed during the move command</span>
+<span class="sd">        :type velocity: float, optional, default=0.1</span>
+<span class="sd">        :return: 0 when target is reached, -1 when timeout is reached</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">setJointMotorControl2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">joint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">POSITION_CONTROL</span><span class="p">,</span> <span class="n">targetPosition</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+                                          <span class="n">maxVelocity</span><span class="o">=</span><span class="n">velocity</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_force</span><span class="p">)</span>
+
+        <span class="n">start_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getJointState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">joint</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-3</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">steps_done</span> <span class="o">-</span> <span class="n">start_steps</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">time_step</span><span class="o">*</span><span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

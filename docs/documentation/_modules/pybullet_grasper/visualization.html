@@ -1,0 +1,506 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pybullet_grasper.visualization &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Grasping with PyBullet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html#pybullet-grasper">pybullet_grasper</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pybullet_grasper.visualization</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pybullet_grasper.visualization</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Visualzation class</span>
+
+<span class="sd">:Author: Lukas Rustler</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">open3d</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">o3d</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">open3d.visualization.gui</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gui</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">open3d.visualization.rendering</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rendering</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rotation</span> <span class="k">as</span> <span class="n">ts</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybullet_grasper.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">MeshInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+
+
+<span class="n">Vector3</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Visualizer"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Visualizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to help with custom rendering&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">visible</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes Open3D-based visualization utilities.</span>
+
+<span class="sd">        :param client: active simulation client used to query geometry states</span>
+<span class="sd">        :type client: Any, optional, default=None</span>
+<span class="sd">        :param visible: 1 to show UI window, 0 for headless render loop</span>
+<span class="sd">        :type visible: int, optional, default=0</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="n">visible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_alive</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rendered_geometries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_msg</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gws_vis</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_image</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># create the instance, window and OpenDScene widget to visualize geometries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="n">gui</span><span class="o">.</span><span class="n">Application</span><span class="o">.</span><span class="n">instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="n">gui</span><span class="o">.</span><span class="n">Application</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="s2">&quot;BulletGrasper&quot;</span><span class="p">,</span>
+                                                             <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                             <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">visible</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">set_on_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_key_event</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">menubar</span> <span class="o">=</span> <span class="n">gui</span><span class="o">.</span><span class="n">Menu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">menubar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">gui</span><span class="o">.</span><span class="n">SceneWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">rendering</span><span class="o">.</span><span class="n">Open3DScene</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">renderer</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">scene</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">background_color</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">set_background</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">set_lighting</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">NO_SHADOWS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># prepare default material</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mat</span> <span class="o">=</span> <span class="n">rendering</span><span class="o">.</span><span class="n">MaterialRecord</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mat</span><span class="o">.</span><span class="n">shader</span> <span class="o">=</span> <span class="s1">&#39;defaultLit&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span> <span class="o">=</span> <span class="n">gui</span><span class="o">.</span><span class="n">Menu</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">show_idx</span><span class="p">,</span> <span class="n">show_obj</span><span class="p">,</span> <span class="n">is_shown</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+                                                <span class="p">[</span><span class="s2">&quot;Gripper&quot;</span><span class="p">,</span> <span class="s2">&quot;Object&quot;</span><span class="p">,</span> <span class="s2">&quot;Cones&quot;</span><span class="p">,</span> <span class="s2">&quot;Torques&quot;</span><span class="p">,</span> <span class="s2">&quot;Normals&quot;</span><span class="p">,</span> <span class="s2">&quot;Axes&quot;</span><span class="p">,</span> <span class="s2">&quot;GWS&quot;</span><span class="p">],</span>
+                                                <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span><span class="o">.</span><span class="n">add_item</span><span class="p">(</span><span class="n">show_obj</span><span class="p">,</span> <span class="n">show_idx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">set_on_menu_item_activated</span><span class="p">(</span><span class="n">show_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">KeyCallback</span><span class="p">(</span><span class="n">show_obj</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">show_idx</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span><span class="o">.</span><span class="n">set_checked</span><span class="p">(</span><span class="n">show_idx</span><span class="p">,</span> <span class="n">is_shown</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span><span class="o">.</span><span class="n">set_enabled</span><span class="p">(</span><span class="n">show_idx</span><span class="p">,</span> <span class="n">is_shown</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="s2">&quot;Show&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span><span class="o">.</span><span class="n">set_enabled</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="c1"># Axes</span>
+
+        <span class="c1"># add to window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_mesh</span><span class="p">()</span>
+
+        <span class="c1"># compute center of all objects</span>
+        <span class="n">scene_mesh</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">TriangleMesh</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f_path</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;plane.obj&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f_path</span> <span class="ow">and</span> <span class="s2">&quot;pc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f_path</span><span class="p">:</span>
+                <span class="n">scene_mesh</span> <span class="o">+=</span> <span class="n">m</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">scene_mesh</span><span class="o">.</span><span class="n">get_axis_aligned_bounding_box</span><span class="p">()</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">get_center</span><span class="p">()</span>
+        <span class="c1"># look at the center</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">look_at</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">center</span><span class="o">+</span><span class="p">[</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">center_of_rotation</span> <span class="o">=</span> <span class="n">center</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_key_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">gui</span><span class="o">.</span><span class="n">KeyEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Callback to handle keyboard events in the Open3D window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We usually only want to trigger an action when the key is pressed DOWN</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">gui</span><span class="o">.</span><span class="n">KeyEvent</span><span class="o">.</span><span class="n">DOWN</span><span class="p">:</span>
+            <span class="c1"># Example: Pressing &#39;Q&#39; to quit</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">gui</span><span class="o">.</span><span class="n">KeyName</span><span class="o">.</span><span class="n">Q</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">last_key</span> <span class="o">=</span> <span class="s2">&quot;q&quot;</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Return False if the event wasn&#39;t handled here,</span>
+        <span class="c1"># allowing default Open3D behaviors (like camera movement) to still work.</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="Visualizer.show_mesh"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer.show_mesh">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">show_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to parse message with information to insert objects to window</span>
+<span class="sd">        :param obj_type: which type of objects is being shown - gripper, object</span>
+<span class="sd">        :type obj_type: str, optional, default=&quot;&quot;</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">MeshInfo</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualization_objects</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">read_info</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">mesh_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="c1"># get correct values for given mesh</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="n">mesh_id</span> <span class="o">*</span> <span class="mi">3</span><span class="p">:(</span><span class="n">mesh_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">ori</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">ori</span><span class="p">[</span><span class="n">mesh_id</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:(</span><span class="n">mesh_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">]</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="n">mesh_id</span> <span class="o">*</span> <span class="mi">3</span><span class="p">:(</span><span class="n">mesh_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">f_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="n">mesh_id</span><span class="p">]</span>
+
+            <span class="c1"># check the type based on the information whether the files are located in grippers folder</span>
+            <span class="k">if</span> <span class="s2">&quot;grippers&quot;</span> <span class="ow">in</span> <span class="n">f_path</span><span class="p">:</span>
+                <span class="n">mesh_type</span> <span class="o">=</span> <span class="s2">&quot;gripper&quot;</span>
+            <span class="k">elif</span> <span class="s2">&quot;plane&quot;</span> <span class="ow">in</span> <span class="n">f_path</span><span class="p">:</span>
+                <span class="n">mesh_type</span> <span class="o">=</span> <span class="s2">&quot;plane&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mesh_type</span> <span class="o">=</span> <span class="s2">&quot;object&quot;</span>
+            <span class="c1"># skin when types do not agree</span>
+            <span class="k">if</span> <span class="n">obj_type</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">obj_type</span> <span class="o">!=</span> <span class="n">mesh_type</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">f_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">f_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_triangle_mesh</span><span class="p">(</span><span class="n">f_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">f_path</span><span class="p">]</span><span class="o">.</span><span class="n">paint_uniform_color</span><span class="p">(</span><span class="n">col</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+
+                <span class="c1"># Just for visualization</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">f_path</span><span class="p">]</span><span class="o">.</span><span class="n">has_triangle_normals</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">f_path</span><span class="p">]</span><span class="o">.</span><span class="n">compute_triangle_normals</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">f_path</span><span class="p">]</span><span class="o">.</span><span class="n">has_vertex_normals</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">f_path</span><span class="p">]</span><span class="o">.</span><span class="n">compute_vertex_normals</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">mesh_type</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mesh_id</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rendered_geometries</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">add_geometry</span><span class="p">(</span><span class="n">mesh_type</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mesh_id</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">f_path</span><span class="p">],</span> <span class="n">material</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mat</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rendered_geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mesh_type</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mesh_id</span><span class="p">))</span>
+
+            <span class="c1"># get ori and position as 4x4 transformation matrix</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">from_quat</span><span class="p">(</span><span class="n">ori</span><span class="p">)</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span>
+            <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pos</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">set_geometry_transform</span><span class="p">(</span><span class="n">mesh_type</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mesh_id</span><span class="p">),</span> <span class="n">R</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Visualizer.render"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer.render">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interactive render</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_mesh</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">post_redraw</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">run_one_tick</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_alive</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">visible</span><span class="p">:</span>
+            <span class="n">img_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="s2">&quot;imgs&quot;</span><span class="p">,</span> <span class="s2">&quot;img_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">render_to_image</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_image</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_image</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">o3d</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">img_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_image</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">img_counter</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Visualizer.save_image"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer.save_image">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">save_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">im</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stores the last rendered image from asynchronous Open3D callback.</span>
+
+<span class="sd">        :param im: rendered image instance provided by Open3D</span>
+<span class="sd">        :type im: Any</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_image</span> <span class="o">=</span> <span class="n">im</span></div>
+
+<div class="viewcode-block" id="Visualizer.draw_normal_forces"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer.draw_normal_forces">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">draw_normal_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">world_origin</span><span class="p">:</span> <span class="n">Vector3</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draws line segments for contact normals.</span>
+
+<span class="sd">        :param points: contact point positions</span>
+<span class="sd">        :type points: np.ndarray</span>
+<span class="sd">        :param normals: normal vectors at contact points</span>
+<span class="sd">        :type normals: np.ndarray</span>
+<span class="sd">        :param world_origin: origin offset applied to rendered vectors</span>
+<span class="sd">        :type world_origin: list[float] | np.ndarray, optional, default=[0, 0, 0]</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ls</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">LineSet</span><span class="p">()</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">points</span><span class="o">+</span><span class="n">world_origin</span><span class="p">,</span> <span class="n">points</span><span class="o">+</span><span class="n">normals</span><span class="o">+</span><span class="n">world_origin</span><span class="p">))</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">ls</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3dVector</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">ls</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector2iVector</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">normals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">rgb_colors</span><span class="p">[</span><span class="n">indexes</span><span class="p">]</span>
+        <span class="n">ls</span><span class="o">.</span><span class="n">colors</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3dVector</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">add_geometry</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;normals&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">ls</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">show_geometry</span><span class="p">(</span><span class="s2">&quot;normals&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rendered_geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;normals&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span><span class="o">.</span><span class="n">set_enabled</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="c1"># Normals</span></div>
+
+<div class="viewcode-block" id="Visualizer.draw_force_torques"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer.draw_force_torques">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">draw_force_torques</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">forces</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">torques</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">cone_vertices</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">magnitudes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">world_origin</span><span class="p">:</span> <span class="n">Vector3</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draws friction cones and torque vectors for currently active contacts.</span>
+
+<span class="sd">        :param points: contact point positions</span>
+<span class="sd">        :type points: np.ndarray</span>
+<span class="sd">        :param forces: discretized friction cone forces</span>
+<span class="sd">        :type forces: np.ndarray</span>
+<span class="sd">        :param torques: corresponding torques for plotted forces</span>
+<span class="sd">        :type torques: np.ndarray</span>
+<span class="sd">        :param cone_vertices: number of vertices per friction cone approximation</span>
+<span class="sd">        :type cone_vertices: int</span>
+<span class="sd">        :param magnitudes: normal force magnitudes used for cone scaling</span>
+<span class="sd">        :type magnitudes: np.ndarray</span>
+<span class="sd">        :param world_origin: origin offset applied to rendered vectors</span>
+<span class="sd">        :type world_origin: list[float] | np.ndarray, optional, default=[0, 0, 0]</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># create LineSet</span>
+        <span class="n">ls</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">LineSet</span><span class="p">()</span>
+
+        <span class="n">torque_origins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">world_origin</span><span class="p">,</span> <span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cone_vertices</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># Stack points and point with normals</span>
+        <span class="n">torques</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">torque_origins</span><span class="p">,</span> <span class="n">torque_origins</span> <span class="o">+</span> <span class="n">torques</span><span class="p">))</span>
+
+        <span class="c1"># Make lines between individual points and points with normals</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">torques</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">torques</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">torques</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">ls</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3dVector</span><span class="p">(</span><span class="n">torques</span><span class="p">)</span>
+        <span class="n">ls</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector2iVector</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+        <span class="c1"># Paint by different color</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lines</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="n">cone_vertices</span><span class="p">),</span> <span class="n">cone_vertices</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">rgb_colors</span><span class="p">[</span><span class="n">indexes</span><span class="p">]</span>
+        <span class="n">ls</span><span class="o">.</span><span class="n">colors</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3dVector</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">add_geometry</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;torques&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">ls</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">show_geometry</span><span class="p">(</span><span class="s2">&quot;torques&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rendered_geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;torques&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span><span class="o">.</span><span class="n">set_enabled</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">point_id</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+            <span class="n">cone_forces</span> <span class="o">=</span> <span class="n">forces</span><span class="p">[</span><span class="n">point_id</span><span class="o">*</span><span class="n">cone_vertices</span><span class="p">:(</span><span class="n">point_id</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">cone_vertices</span><span class="p">]</span>
+            <span class="c1"># cone_forces = (cone_forces-point)/5000 + point + world_origin</span>
+            <span class="n">cone_forces</span> <span class="o">*=</span> <span class="n">magnitudes</span><span class="p">[</span><span class="n">point_id</span><span class="p">]</span><span class="o">*</span><span class="n">scale</span>
+            <span class="n">cone_forces</span> <span class="o">+=</span> <span class="n">point</span> <span class="o">+</span> <span class="n">world_origin</span>
+
+            <span class="n">cone_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">point</span><span class="o">+</span><span class="n">world_origin</span><span class="p">,</span> <span class="n">cone_forces</span><span class="p">))</span>
+            <span class="n">pc</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">PointCloud</span><span class="p">(</span><span class="n">o3d</span><span class="o">.</span><span class="n">utility</span><span class="o">.</span><span class="n">Vector3dVector</span><span class="p">(</span><span class="n">cone_points</span><span class="p">))</span>
+            <span class="n">mesh</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">compute_convex_hull</span><span class="p">()</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">orient_triangles</span><span class="p">()</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">compute_triangle_normals</span><span class="p">()</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">paint_uniform_color</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">rgb_colors</span><span class="p">[</span><span class="n">point_id</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">add_geometry</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;cones_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">point_id</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mat</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">show_geometry</span><span class="p">(</span><span class="s2">&quot;cones_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">point_id</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">add_geometry</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;cones_pc_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">point_id</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">pc</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mat</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">show_geometry</span><span class="p">(</span><span class="s2">&quot;cones_pc_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">point_id</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rendered_geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;cones_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">point_id</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rendered_geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;cones_pc_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">point_id</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_menu</span><span class="o">.</span><span class="n">set_enabled</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Visualizer.draw_gws"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer.draw_gws">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">draw_gws</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens per-hull windows with grasp wrench space meshes.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">gws_type</span><span class="p">,</span> <span class="n">gws_mesh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">gws_meshes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">gui</span><span class="o">.</span><span class="n">Application</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="n">gws_type</span><span class="p">,</span> <span class="mi">640</span><span class="p">,</span> <span class="mi">480</span><span class="p">)</span>
+
+            <span class="n">scene</span> <span class="o">=</span> <span class="n">gui</span><span class="o">.</span><span class="n">SceneWidget</span><span class="p">()</span>
+            <span class="n">scene</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">rendering</span><span class="o">.</span><span class="n">Open3DScene</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">renderer</span><span class="p">)</span>
+            <span class="n">vis</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">scene</span>
+            <span class="n">scene</span><span class="o">.</span><span class="n">background_color</span> <span class="o">=</span> <span class="n">o3d</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">scene</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">gui</span><span class="o">.</span><span class="n">Rect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">640</span><span class="p">,</span> <span class="mi">480</span><span class="p">)</span>
+            <span class="n">vis</span><span class="o">.</span><span class="n">set_background</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">vis</span><span class="o">.</span><span class="n">set_lighting</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">NO_SHADOWS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="n">vis</span><span class="o">.</span><span class="n">add_geometry</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">gws_type</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">gws_mesh</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mat</span><span class="p">)</span>
+
+            <span class="n">window</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">scene</span><span class="p">)</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">show_menu</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">window</span><span class="o">.</span><span class="n">set_on_close</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OnCloseGWS</span><span class="p">(</span><span class="n">gws_type</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gws_vis</span><span class="p">[</span><span class="n">gws_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">gws_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Visualizer.OnCloseGWS"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer.OnCloseGWS">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">OnCloseGWS</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Help class delete information about the given GWS window from visualizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gws_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="s2">&quot;Visualizer&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Init</span>
+<span class="sd">            :param gws_type: type of GWS, by default something like L1_fixed_force; used as key to dictionary</span>
+<span class="sd">            :type gws_type: str</span>
+<span class="sd">            :param parent: pointer to parent instance</span>
+<span class="sd">            :type parent: Visualizer</span>
+<span class="sd">            :return: None</span>
+<span class="sd">            :rtype: None</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gws_type</span> <span class="o">=</span> <span class="n">gws_type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            When callback to close window is received, delete the thing from dictionary</span>
+<span class="sd">            :return: True so Open3D finalizes window close</span>
+<span class="sd">            :rtype: bool</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">gws_vis</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">gws_type</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">gws_vis</span> <span class="o">==</span> <span class="p">{}:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">set_checked</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># return True so the window is really closed</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Visualizer.KeyCallback"><a class="viewcode-back" href="../../visualization.html#pybullet_grasper.visualization.Visualizer.KeyCallback">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">KeyCallback</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Help function to unify key callbacks for toggling thingies in the windows</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">menu_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Init</span>
+<span class="sd">            :param geom_type: name of geometric type: cone, object, gripper</span>
+<span class="sd">            :type geom_type: str</span>
+<span class="sd">            :param parent: pointer to the parent instance</span>
+<span class="sd">            :type parent: Any</span>
+<span class="sd">            :param menu_id: menu item identifier in Open3D menu</span>
+<span class="sd">            :type menu_id: int</span>
+<span class="sd">            :return: None</span>
+<span class="sd">            :rtype: None</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">=</span> <span class="n">geom_type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">menu_id</span> <span class="o">=</span> <span class="n">menu_id</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Does something when callback is called</span>
+
+<span class="sd">            :return: 0 on handled action</span>
+<span class="sd">            :rtype: int</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">show</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">is_checked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menu_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">menu</span><span class="o">.</span><span class="n">set_checked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">menu_id</span><span class="p">,</span> <span class="n">show</span><span class="p">)</span>
+            <span class="c1"># if axes button, show them and return</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;axes&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">Visualizer</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">show_axes</span><span class="p">(</span><span class="n">show</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">show_axes</span><span class="p">(</span><span class="n">show</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;gws&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">gws_meshes</span> <span class="o">==</span> <span class="p">{}:</span>
+                    <span class="k">for</span> <span class="n">hull_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">hulls</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">compute_gws_mesh</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">hull_type</span><span class="o">+</span><span class="s2">&quot;_fixed_force&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">compute_gws_mesh</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">hull_type</span><span class="o">+</span><span class="s2">&quot;_fixed_torque&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">draw_gws</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">windows</span> <span class="o">=</span> <span class="p">[</span><span class="n">window</span> <span class="k">for</span> <span class="n">window</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">visualizer</span><span class="o">.</span><span class="n">gws_vis</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+                    <span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">windows</span><span class="p">:</span>
+                        <span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">del</span> <span class="n">windows</span>
+
+            <span class="c1"># iterate over all geometries</span>
+            <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">rendered_geometries</span><span class="p">:</span>
+                <span class="c1"># if the geometry is one of the needed types show/hide it</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span> <span class="ow">in</span> <span class="n">geom</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cones&quot;</span><span class="p">,</span> <span class="s2">&quot;torques&quot;</span><span class="p">,</span> <span class="s2">&quot;normals&quot;</span><span class="p">]:</span>
+                        <span class="n">pos</span><span class="p">,</span> <span class="n">ori</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+                        <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">getMatrixFromQuaternion</span><span class="p">(</span><span class="n">ori</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+                        <span class="n">R</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pos</span>
+                        <span class="n">R</span> <span class="o">=</span> <span class="n">R</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">grasper</span><span class="o">.</span><span class="n">pose</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">set_geometry_transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">vis</span><span class="o">.</span><span class="n">show_geometry</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">show</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

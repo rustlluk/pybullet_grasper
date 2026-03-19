@@ -1,0 +1,549 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grasping with PyBullet &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/jquery.js?v=5d32c60e"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/https://rustlluk.github.io/pybullet_grasper/documentation/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/doctools.js?v=888ff710"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="bullet_classes" href="bullet_classes.html" />
+    <link rel="prev" title="Welcome to pybullet_grasper documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Grasping with PyBullet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pure-python">Pure Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ros">ROS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Pure Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">ROS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#config-files">Config files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-meshes-and-processing">Input Meshes and Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#citing">Citing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#pybullet-grasper">pybullet_grasper</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bullet_classes.html">bullet_classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp.html">grasp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html">grasp_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator_service.html">grasp_generator_service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasper_main.html">grasper_main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Grasping with PyBullet</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="https://rustlluk.github.io/pybullet_grasper/documentation/_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grasping-with-pybullet">
+<h1>Grasping with PyBullet<a class="headerlink" href="#grasping-with-pybullet" title="Permalink to this heading"></a></h1>
+<p>This package provides an interface for grasp planning using PyBullet. It includes a grasp planner that can
+generate grasp candidates for a given object.</p>
+<a class="reference external image-reference" href="https://rustlluk.github.io/pybullet_grasper/documentation/https://rustlluk.github.io/pybullet_grasper/documentation/_images/img.png"><img alt="img" src="https://rustlluk.github.io/pybullet_grasper/documentation/https://rustlluk.github.io/pybullet_grasper/documentation/_images/img.png" /></a>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<section id="pure-python">
+<h3>Pure Python<a class="headerlink" href="#pure-python" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>You can install the package using pip: <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pybullet_grasper</span></code></p>
+<ul>
+<li><p>when using python3.8 you might need to install upgrade pip and install development version of open3d</p></li>
+</ul>
+</li>
+<li><p>Or clone this repository <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/rustlluk/pybullet_grasper.git</span></code>; go to src/pybullet_grasper and install it locally: <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p></li>
+</ul>
+</section>
+<section id="ros">
+<h3>ROS<a class="headerlink" href="#ros" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>You can install the package in ROS1 Noetic workspace</p>
+<ul>
+<li><p>Clone the repository or put the pybullet_grasper folder (inside src of this repo) to src of your ROS workspace</p>
+<ul>
+<li><p>should be as <code class="docutils literal notranslate"><span class="pre">catkin_ws/src/pybullet_grasper</span></code></p>
+<ul>
+<li><p>this includes setup.py, src, objects, etc.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">catkin_build</span></code> it</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>See the branch <a class="reference external" href="https://github.com/rustlluk/ShapeGrasp">ShapeGrasp repo</a> for Dockerfile and Docker installation instructions</p></li>
+</ul>
+</section>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
+<section id="id1">
+<h3>Pure Python<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>The easier option is to either:</p>
+<ul>
+<li><p><strong>CLI</strong> in command line run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">pybullet_grasper.grasper_main</span></code> to see a demo of the grasp planner. This
+will print the results (if debug enabled) and/or save them to a file (if save_path provided)</p>
+<ul>
+<li><p>possible command line options:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">--object_name/-o</span></code>: path to the .obj file</p>
+<ul>
+<li><p>can be a relative path with respect to current folder, an absolute path, or a path related to installed path
+and be in pybullet_grasper/objects (when installed through pip it will be in
+sys.prefix/share/pybullet_grasper/objects)</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--config_name/-c</span></code>: path to .yaml config file</p>
+<ul>
+<li><p>can be a relative path with respect to current folder, an absolute path, or a path related to installed path
+and be in pybullet_grasper/configs (when installed through pip it will be in
+sys.prefix/share/pybullet_grasper/config)</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--ros/-r</span></code>: whether to use ROS or not</p>
+<ul>
+<li><p>if True, it will run the grasper as ROS node</p></li>
+<li><p>requires roscore running and rospy installed</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--service/-s</span></code>: call the ROS service</p>
+<ul>
+<li><p>requires node with rosservice running</p></li>
+<li><p>here the object and config paths must be absolute, or the files must be located in ws/src/pybullet_grasper/configs and …./objects, respectively</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--save_path/-sp</span></code>: path where to save the generated grasps; str or None</p>
+<ul>
+<li><p>will be saved as file with values seperated by “;”, so it is recommended to use .csv format</p></li>
+<li><p>if None -&gt; nothing will be saved</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>API</strong> you can import the package main as <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">pybullet_grasper.grasper_main</span> <span class="pre">import</span> <span class="pre">main</span></code> and call it
+<code class="docutils literal notranslate"><span class="pre">result</span> <span class="pre">=</span> <span class="pre">main(object_name,</span> <span class="pre">config_name,</span> <span class="pre">ros=False,</span> <span class="pre">service=False)</span></code>, where:</p>
+<ul>
+<li><p>object_name: path to the .obj file</p>
+<ul>
+<li><p>can be a relative path with respect to current folder, an absolute path, or a path related to installed path
+and be in pybullet_grasper/objects (when installed through pip it will be in
+sys.prefix/share/pybullet_grasper/objects)</p></li>
+</ul>
+</li>
+<li><p>config_name: path to .yaml config file</p>
+<ul>
+<li><p>can be a relative path with respect to current folder, an absolute path, or a path related to installed path
+and be in pybullet_grasper/configs (when installed through pip it will be in
+sys.prefix/share/pybullet_grasper/config)</p></li>
+</ul>
+</li>
+<li><p>ros: boolean, whether to run as a ROS node or not</p></li>
+<li><p>service: boolean, whether to call as ROS service or not</p></li>
+<li><p>save_path: str or None; path where to save the generated grasps</p>
+<ul>
+<li><p>will be saved as file with values seperated by “;”, so it is recommended to use .csv format</p></li>
+<li><p>if None -&gt; nothing will be saved</p></li>
+</ul>
+</li>
+<li><p>result: pybullet_grasper.utils.GenerateGraspsResponse object</p>
+<ul>
+<li><p>see <a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/src/pybullet_grasper/utils.py">utils.py</a> for details on the response object and its attributes</p></li>
+</ul>
+</li>
+<li><p>see <a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/examples/example.py">examples/example.py</a> for usage</p></li>
+</ul>
+</li>
+<li><p><strong>Low-level API</strong>  you can import directly <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">pybullet_grasper.grasp_generator</span> <span class="pre">import</span> <span class="pre">GraspGenerator</span></code></p>
+<ul>
+<li><p>see <a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/src/pybullet_grasper/grasper_main.py">grasper_main.py</a> for usage</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h3>ROS<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<ul>
+<li><p>When you have ROS installed and the package installed, you can:</p>
+<ul>
+<li><p><strong>ROS Node</strong> run the script as node (works the same as pure python basically, but uses ROS messages etc.)</p>
+<ul class="simple">
+<li><p>use either the CLI or API options described above, but with <code class="docutils literal notranslate"><span class="pre">--ros/-r</span></code> (in CLI) or ros argument (API) set to True</p>
+<ul>
+<li><p>see also <a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/src/pybullet_grasper/grasper_main.py">grasper_main.py</a> for low-level usage</p></li>
+</ul>
+</li>
+<li><p>roscore must be running for this</p></li>
+</ul>
+</li>
+<li><p><strong>ROS Service</strong> call the ROS service to get grasp candidates</p>
+<ul>
+<li><p>to just test it, you can use the CLI (with <code class="docutils literal notranslate"><span class="pre">--service/-s</span></code> option) or API (with <code class="docutils literal notranslate"><span class="pre">service=True</span></code> argument) options described above</p></li>
+<li><p>roscore and <a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/src/pybullet_grasper/grasp_generator_service.py">grasp_generator_service.py</a> node must be running for this</p>
+<ul class="simple">
+<li><p>you can run  <code class="docutils literal notranslate"><span class="pre">roslaunch</span> <span class="pre">pybullet_grasper</span> <span class="pre">main.launch</span></code> to run the roscore and service</p></li>
+</ul>
+</li>
+<li><p>Otherwise, the <a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/src/pybullet_grasper/srv/GenerateGrasps.srv">service file</a> is defined as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">std_msgs</span><span class="o">/</span><span class="n">String</span> <span class="n">object_name</span>
+<span class="n">std_msgs</span><span class="o">/</span><span class="n">String</span><span class="p">[]</span> <span class="n">grasp_type</span>
+<span class="n">float32</span><span class="p">[]</span> <span class="n">init_position</span>
+<span class="o">---</span>
+<span class="n">geometry_msgs</span><span class="o">/</span><span class="n">Pose</span><span class="p">[]</span> <span class="n">poses</span>
+<span class="n">float32</span><span class="p">[]</span> <span class="n">qualities</span>
+<span class="n">float32</span><span class="p">[]</span> <span class="n">poses_after_grasps</span>
+</pre></div>
+</div>
+<p>and can be called as (see also <a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/examples/example_service.py">example_service.py</a>):
+<a href="#id4"><span class="problematic" id="id5">``</span></a>`
+import rospy
+from pybullet_grasper.srv import GenerateGrasps, GenerateGraspsRequest</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if __name__ == &quot;__main__&quot;:
+    # Here the path must be absolute or the .yaml must be in ws/src/pybullet_grasper/configs and .obj in ws/src/pybullet_grasper/objects
+    config_name = &quot;example.yaml&quot;
+    object_name = &quot;example.obj&quot;
+
+    rospy.init_node(&quot;grasp_generator_node&quot;)
+
+    rospy.set_param(&quot;config_name&quot;, config_name)
+
+    rospy.wait_for_service(&quot;generate_grasps&quot;)
+    generate_grasps = rospy.ServiceProxy(&quot;generate_grasps&quot;, GenerateGrasps)
+
+    request = GenerateGraspsRequest()
+    request.object_name.data = object_name
+    request.init_position = [0, 0, 0]
+    result = generate_grasps.call(request)
+```
+or from the command line as:
+```
+rosservice call /generate_grasps &quot;{object_name: {data: &#39;example.obj&#39;}, grasp_type: [{data: &#39;example.yaml&#39;}], init_position: [0.0, 0.0, 0.0]}&quot;
+```
+</pre></div>
+</div>
+</section>
+</section>
+<section id="config-files">
+<h2>Config files<a class="headerlink" href="#config-files" title="Permalink to this heading"></a></h2>
+<p>The pacakge uses .yaml config files to specify both parameters of the grasp planner and visualization/debug options.
+The default one can be found in <a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/src/pybullet_grasper/configs/default.yaml">src/pybullet_grasper/configs/default.yaml</a>
+The main things to change are:</p>
+<ul class="simple">
+<li><p>gripper: for now “robotiq” or “barrett”</p>
+<ul>
+<li><p>users can add new grippers adding the API in a similar form to the existing ones, available in
+<a class="reference external" href="https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/main/src/pybullet_grasper/src/pybullet_grasper/bullet_classes.py">bullet_classes.py</a></p></li>
+</ul>
+</li>
+<li><p>debug: boolean; when True additional prints are shown. Also neccessary when visualization.show_last enabled</p></li>
+<li><p>visualization.show_last: boolean; when True, the best generated grasp candidate is visualized.</p>
+<ul>
+<li><p>Requires debug to be True as well.</p></li>
+</ul>
+</li>
+<li><p>visualization.debug_sleep: float; when show_last is enabled, it will most probably run super fast. debug_sleep can
+make the rendering slower (0.01) is a good value on most machines</p></li>
+<li><p>analytical.enabled: boolean; when True, friction cones and GWS are computed (with epsilon-quality and GWS volume) and
+can be shown in the visualizer if show_last is enabled</p>
+<ul>
+<li><p>very preliminary version, will most like not work every time</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="input-meshes-and-processing">
+<h2>Input Meshes and Processing<a class="headerlink" href="#input-meshes-and-processing" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>the input meshes must be in .obj format (Wavefront OBJ format). You can use third-party libraries like <a class="reference external" href="https://www.meshlab.net/">Meshlab</a>,
+<a class="reference external" href="http://www.open3d.org/">open3D</a>, or <a class="reference external" href="https://www.blender.org/">Blender</a> to convert your meshes to .obj format if they are in a different format.</p></li>
+<li><p>We further employ the <a class="reference external" href="https://github.com/Unity-Technologies/VHACD">VHACD</a> library to perform convex decomposition of
+the meshes. This steps takes some time in the beginning. But it is necessary for detection collision of object and gripper properly</p></li>
+</ul>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading"></a></h2>
+<p>`
+.. image:: <a class="reference external" href="https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg">https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg</a></p>
+<blockquote>
+<div><blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">target<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg">https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg</a></p>
+</dd>
+<dt class="field-even">alt<span class="colon">:</span></dt>
+<dd class="field-even"><p>CC BY 4.0</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>&lt;<a class="reference external" href="http://creativecommons.org/licenses/by/4.0/">http://creativecommons.org/licenses/by/4.0/</a>&gt;`_</p>
+</div></blockquote>
+<p>This work is licensed under a
+<a class="reference external" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+<p>`
+.. image:: <a class="reference external" href="https://i.creativecommons.org/l/by/4.0/88x31.png">https://i.creativecommons.org/l/by/4.0/88x31.png</a></p>
+<blockquote>
+<div><blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">target<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://i.creativecommons.org/l/by/4.0/88x31.png">https://i.creativecommons.org/l/by/4.0/88x31.png</a></p>
+</dd>
+<dt class="field-even">alt<span class="colon">:</span></dt>
+<dd class="field-even"><p>CC BY 4.0</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>&lt;<a class="reference external" href="http://creativecommons.org/licenses/by/4.0/">http://creativecommons.org/licenses/by/4.0/</a>&gt;`_</p>
+</div></blockquote>
+<p>See licences of the used libraries like PyBullet, Open3D, etc. for more details.</p>
+</section>
+<section id="citing">
+<h2>Citing<a class="headerlink" href="#citing" title="Permalink to this heading"></a></h2>
+<p>When used, please cite this repository as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@inproceedings</span><span class="p">{</span><span class="n">rustler2026ShapeGrasp</span><span class="p">,</span>
+      <span class="n">title</span><span class="o">=</span><span class="p">{},</span>
+      <span class="n">author</span><span class="o">=</span><span class="p">{},</span>
+      <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2026</span><span class="p">},</span>
+      <span class="n">booktitle</span><span class="o">=</span><span class="p">{},</span>
+      <span class="n">organization</span><span class="o">=</span><span class="p">{}}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="pybullet-grasper">
+<h1>pybullet_grasper<a class="headerlink" href="#pybullet-grasper" title="Permalink to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bullet_classes.html">bullet_classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett"><code class="docutils literal notranslate"><span class="pre">Barrett</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.JOINTS"><code class="docutils literal notranslate"><span class="pre">Barrett.JOINTS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.MIMICS"><code class="docutils literal notranslate"><span class="pre">Barrett.MIMICS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.load_gripper"><code class="docutils literal notranslate"><span class="pre">Barrett.load_gripper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.motion_done"><code class="docutils literal notranslate"><span class="pre">Barrett.motion_done()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.move"><code class="docutils literal notranslate"><span class="pre">Barrett.move()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.prepare_gripper"><code class="docutils literal notranslate"><span class="pre">Barrett.prepare_gripper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.reset_constraints"><code class="docutils literal notranslate"><span class="pre">Barrett.reset_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.set_gripper_pose"><code class="docutils literal notranslate"><span class="pre">Barrett.set_gripper_pose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Barrett.stop"><code class="docutils literal notranslate"><span class="pre">Barrett.stop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client"><code class="docutils literal notranslate"><span class="pre">Client</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.contactPoints"><code class="docutils literal notranslate"><span class="pre">Client.contactPoints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.dynamicsInfo"><code class="docutils literal notranslate"><span class="pre">Client.dynamicsInfo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.is_alive"><code class="docutils literal notranslate"><span class="pre">Client.is_alive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.jointInfo"><code class="docutils literal notranslate"><span class="pre">Client.jointInfo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.jointStates"><code class="docutils literal notranslate"><span class="pre">Client.jointStates</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.linkInfo"><code class="docutils literal notranslate"><span class="pre">Client.linkInfo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.load_objects"><code class="docutils literal notranslate"><span class="pre">Client.load_objects()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.lower_the_plane"><code class="docutils literal notranslate"><span class="pre">Client.lower_the_plane()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.read_info"><code class="docutils literal notranslate"><span class="pre">Client.read_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.reset"><code class="docutils literal notranslate"><span class="pre">Client.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.step_simulation"><code class="docutils literal notranslate"><span class="pre">Client.step_simulation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Client.visualShapeData"><code class="docutils literal notranslate"><span class="pre">Client.visualShapeData</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.GraspableBody"><code class="docutils literal notranslate"><span class="pre">GraspableBody</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.GraspableBody.prepare_body"><code class="docutils literal notranslate"><span class="pre">GraspableBody.prepare_body()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.GraspableBody.prepare_mesh"><code class="docutils literal notranslate"><span class="pre">GraspableBody.prepare_mesh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.JOINTS"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.JOINTS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.SIGNS"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.SIGNS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.load_gripper"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.load_gripper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.motion_done"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.motion_done()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.move"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.move()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.prepare_gripper"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.prepare_gripper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_constraints"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.reset_constraints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_joints"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.reset_joints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.set_gripper_pose"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.set_gripper_pose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bullet_classes.html#pybullet_grasper.bullet_classes.Robotiq_2f_85.stop"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.stop()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp.html">grasp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp"><code class="docutils literal notranslate"><span class="pre">Grasp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.MinkowskiSum"><code class="docutils literal notranslate"><span class="pre">Grasp.MinkowskiSum</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.MinkowskiSum.minkowski_sum"><code class="docutils literal notranslate"><span class="pre">Grasp.MinkowskiSum.minkowski_sum()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.colors"><code class="docutils literal notranslate"><span class="pre">Grasp.colors</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.compute_cone"><code class="docutils literal notranslate"><span class="pre">Grasp.compute_cone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.compute_gws_mesh"><code class="docutils literal notranslate"><span class="pre">Grasp.compute_gws_mesh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.evaluate_contact"><code class="docutils literal notranslate"><span class="pre">Grasp.evaluate_contact()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.get_contact_info"><code class="docutils literal notranslate"><span class="pre">Grasp.get_contact_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.project_to_3d"><code class="docutils literal notranslate"><span class="pre">Grasp.project_to_3d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp.html#pybullet_grasper.grasp.Grasp.rgb_colors"><code class="docutils literal notranslate"><span class="pre">Grasp.rgb_colors</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_generator.html">grasp_generator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.ClientProcess"><code class="docutils literal notranslate"><span class="pre">ClientProcess</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.ClientProcess.handle_timeout"><code class="docutils literal notranslate"><span class="pre">ClientProcess.handle_timeout()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.ClientProcess.run"><code class="docutils literal notranslate"><span class="pre">ClientProcess.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.ClientProcess.test_grasp"><code class="docutils literal notranslate"><span class="pre">ClientProcess.test_grasp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.GraspGenerator"><code class="docutils literal notranslate"><span class="pre">GraspGenerator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.GraspGenerator.load_gripper"><code class="docutils literal notranslate"><span class="pre">GraspGenerator.load_gripper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.GraspGenerator.run"><code class="docutils literal notranslate"><span class="pre">GraspGenerator.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.quaternion_multiply"><code class="docutils literal notranslate"><span class="pre">quaternion_multiply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html#pybullet_grasper.grasp_generator.str_to_bool"><code class="docutils literal notranslate"><span class="pre">str_to_bool()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasp_generator_service.html">grasp_generator_service</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator_service.html#pybullet_grasper.grasp_generator_service.generate_grasps"><code class="docutils literal notranslate"><span class="pre">generate_grasps()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grasper_main.html">grasper_main</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grasper_main.html#pybullet_grasper.grasper_main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasper_main.html#pybullet_grasper.grasper_main.prepare_parser"><code class="docutils literal notranslate"><span class="pre">prepare_parser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Config.set_attribute"><code class="docutils literal notranslate"><span class="pre">Config.set_attribute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.GenerateGraspsResponse"><code class="docutils literal notranslate"><span class="pre">GenerateGraspsResponse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Logger"><code class="docutils literal notranslate"><span class="pre">Logger</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Logger.log_critical"><code class="docutils literal notranslate"><span class="pre">Logger.log_critical()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Logger.log_debug"><code class="docutils literal notranslate"><span class="pre">Logger.log_debug()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Logger.log_error"><code class="docutils literal notranslate"><span class="pre">Logger.log_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Logger.log_info"><code class="docutils literal notranslate"><span class="pre">Logger.log_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Logger.log_warning"><code class="docutils literal notranslate"><span class="pre">Logger.log_warning()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.MeshInfo"><code class="docutils literal notranslate"><span class="pre">MeshInfo</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Point"><code class="docutils literal notranslate"><span class="pre">Point</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Pose"><code class="docutils literal notranslate"><span class="pre">Pose</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.Quaternion"><code class="docutils literal notranslate"><span class="pre">Quaternion</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.get_data_folder"><code class="docutils literal notranslate"><span class="pre">get_data_folder()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#pybullet_grasper.utils.suppress_c_output"><code class="docutils literal notranslate"><span class="pre">suppress_c_output()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">visualization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer"><code class="docutils literal notranslate"><span class="pre">Visualizer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer.KeyCallback"><code class="docutils literal notranslate"><span class="pre">Visualizer.KeyCallback</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer.OnCloseGWS"><code class="docutils literal notranslate"><span class="pre">Visualizer.OnCloseGWS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer.draw_force_torques"><code class="docutils literal notranslate"><span class="pre">Visualizer.draw_force_torques()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer.draw_gws"><code class="docutils literal notranslate"><span class="pre">Visualizer.draw_gws()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer.draw_normal_forces"><code class="docutils literal notranslate"><span class="pre">Visualizer.draw_normal_forces()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer.render"><code class="docutils literal notranslate"><span class="pre">Visualizer.render()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer.save_image"><code class="docutils literal notranslate"><span class="pre">Visualizer.save_image()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.html#pybullet_grasper.visualization.Visualizer.show_mesh"><code class="docutils literal notranslate"><span class="pre">Visualizer.show_mesh()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to pybullet_grasper documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bullet_classes.html" class="btn btn-neutral float-right" title="bullet_classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

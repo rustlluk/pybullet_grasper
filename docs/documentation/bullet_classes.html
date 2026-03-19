@@ -1,0 +1,707 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bullet_classes &mdash; pybullet_grasper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="https://rustlluk.github.io/pybullet_grasper/documentation/_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/jquery.js?v=5d32c60e"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/https://rustlluk.github.io/pybullet_grasper/documentation/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/doctools.js?v=888ff710"></script>
+      <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="https://rustlluk.github.io/pybullet_grasper/documentation/_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="grasp" href="grasp.html" />
+    <link rel="prev" title="Grasping with PyBullet" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pybullet_grasper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Grasping with PyBullet</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html#pybullet-grasper">pybullet_grasper</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">bullet_classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett"><code class="docutils literal notranslate"><span class="pre">Barrett</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.JOINTS"><code class="docutils literal notranslate"><span class="pre">Barrett.JOINTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.MIMICS"><code class="docutils literal notranslate"><span class="pre">Barrett.MIMICS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.load_gripper"><code class="docutils literal notranslate"><span class="pre">Barrett.load_gripper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.motion_done"><code class="docutils literal notranslate"><span class="pre">Barrett.motion_done()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.move"><code class="docutils literal notranslate"><span class="pre">Barrett.move()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.prepare_gripper"><code class="docutils literal notranslate"><span class="pre">Barrett.prepare_gripper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.reset_constraints"><code class="docutils literal notranslate"><span class="pre">Barrett.reset_constraints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.set_gripper_pose"><code class="docutils literal notranslate"><span class="pre">Barrett.set_gripper_pose()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Barrett.stop"><code class="docutils literal notranslate"><span class="pre">Barrett.stop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client"><code class="docutils literal notranslate"><span class="pre">Client</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.contactPoints"><code class="docutils literal notranslate"><span class="pre">Client.contactPoints</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.dynamicsInfo"><code class="docutils literal notranslate"><span class="pre">Client.dynamicsInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.is_alive"><code class="docutils literal notranslate"><span class="pre">Client.is_alive()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.jointInfo"><code class="docutils literal notranslate"><span class="pre">Client.jointInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.jointStates"><code class="docutils literal notranslate"><span class="pre">Client.jointStates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.linkInfo"><code class="docutils literal notranslate"><span class="pre">Client.linkInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.load_objects"><code class="docutils literal notranslate"><span class="pre">Client.load_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.lower_the_plane"><code class="docutils literal notranslate"><span class="pre">Client.lower_the_plane()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.read_info"><code class="docutils literal notranslate"><span class="pre">Client.read_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.reset"><code class="docutils literal notranslate"><span class="pre">Client.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.step_simulation"><code class="docutils literal notranslate"><span class="pre">Client.step_simulation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client.visualShapeData"><code class="docutils literal notranslate"><span class="pre">Client.visualShapeData</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.bullet_classes.GraspableBody"><code class="docutils literal notranslate"><span class="pre">GraspableBody</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.GraspableBody.prepare_body"><code class="docutils literal notranslate"><span class="pre">GraspableBody.prepare_body()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.GraspableBody.prepare_mesh"><code class="docutils literal notranslate"><span class="pre">GraspableBody.prepare_mesh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.JOINTS"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.JOINTS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.SIGNS"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.SIGNS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.load_gripper"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.load_gripper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.motion_done"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.motion_done()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.move"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.move()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.prepare_gripper"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.prepare_gripper()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_constraints"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.reset_constraints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_joints"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.reset_joints()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.set_gripper_pose"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.set_gripper_pose()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.stop"><code class="docutils literal notranslate"><span class="pre">Robotiq_2f_85.stop()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grasp.html">grasp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator.html">grasp_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasp_generator_service.html">grasp_generator_service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grasper_main.html">grasper_main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualization.html">visualization</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pybullet_grasper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Grasping with PyBullet</a></li>
+      <li class="breadcrumb-item active">bullet_classes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="https://rustlluk.github.io/pybullet_grasper/documentation/_sources/bullet_classes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pybullet_grasper.bullet_classes">
+<span id="bullet-classes"></span><h1>bullet_classes<a class="headerlink" href="#module-pybullet_grasper.bullet_classes" title="Permalink to this heading"></a></h1>
+<p>Classes for pyBullet grasper containing the Client, Object and Robotiq 2F-85 Gripper and Barrett Hand</p>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lukas Rustler</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.bullet_classes.</span></span><span class="sig-name descname"><span class="pre">Barrett</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client" title="pybullet_grasper.bullet_classes.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Barrett"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Runtime controller for the Barrett Hand gripper loaded in pyBullet.</p>
+<p>Class for the Barrett Hand gripper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> (<a class="reference internal" href="#pybullet_grasper.bullet_classes.Client" title="pybullet_grasper.bullet_classes.Client"><em>Client</em></a>) – instance of Client, holding info about the scene</p></li>
+<li><p><strong>position</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>, </em><em>0</em><em>, </em><em>1</em><em>]</em>) – spawn position of the gripper base in world frame</p></li>
+<li><p><strong>orientation</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>, </em><em>0</em><em>, </em><em>0</em><em>, </em><em>1</em><em>]</em>) – spawn orientation quaternion of the gripper base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.JOINTS">
+<span class="sig-name descname"><span class="pre">JOINTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['bh_j32_joint',</span> <span class="pre">'bh_j12_joint',</span> <span class="pre">'bh_j22_joint',</span> <span class="pre">'bh_j11_joint']</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.JOINTS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.MIMICS">
+<span class="sig-name descname"><span class="pre">MIMICS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'bh_j11_joint':</span> <span class="pre">[1,</span> <span class="pre">'bh_j21_joint'],</span> <span class="pre">'bh_j12_joint':</span> <span class="pre">[0.3442622950819672,</span> <span class="pre">'bh_j13_joint'],</span> <span class="pre">'bh_j22_joint':</span> <span class="pre">[0.3442622950819672,</span> <span class="pre">'bh_j23_joint'],</span> <span class="pre">'bh_j32_joint':</span> <span class="pre">[0.3442622950819672,</span> <span class="pre">'bh_j33_joint']}</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.MIMICS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.load_gripper">
+<span class="sig-name descname"><span class="pre">load_gripper</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Barrett.load_gripper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.load_gripper" title="Permalink to this definition"></a></dt>
+<dd><p>Loads the grippers URDF into the scene</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>body id of the loaded gripper</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.motion_done">
+<span class="sig-name descname"><span class="pre">motion_done</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'force'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contact_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Barrett.motion_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.motion_done" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether gripper is in goal position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default=1e-2</em>) – tolerance around the commanded joint value</p></li>
+<li><p><strong>object_id</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default=-1</em>) – kept for API compatibility with other detectors</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em><em>, </em><em>default=&quot;force&quot;</em>) – kept for API compatibility with other detectors</p></li>
+<li><p><strong>contact_threshold</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default=10</em>) – torque threshold used to classify object contact</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 for normal closure, 2 for collision, 3 for timeout, 0 for no closure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Barrett.move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.move" title="Permalink to this definition"></a></dt>
+<dd><p>Move joint to target position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>joint</strong> (<em>int</em>) – id of the joint</p></li>
+<li><p><strong>target</strong> (<em>float</em>) – target position</p></li>
+<li><p><strong>velocity</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default=0.1</em>) – maximum joint speed during the move command</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 when target is reached, -1 when timeout is reached</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.prepare_gripper">
+<span class="sig-name descname"><span class="pre">prepare_gripper</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Barrett.prepare_gripper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.prepare_gripper" title="Permalink to this definition"></a></dt>
+<dd><p>Sets constraints for joints to works as mimic joint in URDF</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>created constraints, moveable joint ids, joint info, and joint names</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[list, list, list, list]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.reset_constraints">
+<span class="sig-name descname"><span class="pre">reset_constraints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Barrett.reset_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.reset_constraints" title="Permalink to this definition"></a></dt>
+<dd><p>Remove all constraints</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.set_gripper_pose">
+<span class="sig-name descname"><span class="pre">set_gripper_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Barrett.set_gripper_pose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.set_gripper_pose" title="Permalink to this definition"></a></dt>
+<dd><p>Set goal position of gripper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position</strong> (<em>float</em>) – position of the gripper</p></li>
+<li><p><strong>pose</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default=0</em>) – 0 for two-finger mode, 1 to fold one finger out of the way</p></li>
+<li><p><strong>velocity</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em><em>, </em><em>default=None</em>) – unused placeholder for API compatibility</p></li>
+<li><p><strong>wait</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – whether to wait for the motion to finish</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>motion result code, or 0 when command is issued without waiting</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Barrett.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Barrett.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Barrett.stop" title="Permalink to this definition"></a></dt>
+<dd><p>Holds all actuated finger joints at their current positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.bullet_classes.</span></span><span class="sig-name descname"><span class="pre">Client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BulletClient</span></code></p>
+<p>Wrapper around <code class="xref py py-class docutils literal notranslate"><span class="pre">pybullet_utils.bullet_client.BulletClient</span></code> used by the grasper pipeline.</p>
+<p>The class initializes the simulation world, loads the active graspable object,
+and stores convenience indices for pyBullet tuple-based APIs.</p>
+<p>Client class which inherits from BulletClient. Runs the physics client with desired mode and prepares dicts
+for easier access to things</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_path</strong> (<em>str</em>) – path to the config file</p></li>
+<li><p><strong>object_name</strong> (<em>str</em><em>, </em><em>optional</em><em>, </em><em>default=&quot;&quot;</em>) – name of the object; can be relative to the calling script; relative to source_code/objects or an absolute path</p></li>
+<li><p><strong>init_position</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>, </em><em>0</em><em>, </em><em>0</em><em>]</em>) – initial position of the object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.contactPoints">
+<span class="sig-name descname"><span class="pre">contactPoints</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'DISTANCE':</span> <span class="pre">8,</span> <span class="pre">'FLAG':</span> <span class="pre">0,</span> <span class="pre">'FORCE':</span> <span class="pre">9,</span> <span class="pre">'FRICTION1':</span> <span class="pre">10,</span> <span class="pre">'FRICTION2':</span> <span class="pre">12,</span> <span class="pre">'FRICTIONDIR1':</span> <span class="pre">11,</span> <span class="pre">'FRICTIONDIR2':</span> <span class="pre">13,</span> <span class="pre">'IDA':</span> <span class="pre">1,</span> <span class="pre">'IDB':</span> <span class="pre">2,</span> <span class="pre">'INDEXA':</span> <span class="pre">3,</span> <span class="pre">'INDEXB':</span> <span class="pre">4,</span> <span class="pre">'NORMAL':</span> <span class="pre">7,</span> <span class="pre">'POSITIONA':</span> <span class="pre">5,</span> <span class="pre">'POSITIONB':</span> <span class="pre">6}</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.contactPoints" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.dynamicsInfo">
+<span class="sig-name descname"><span class="pre">dynamicsInfo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'BODYTYPE':</span> <span class="pre">10,</span> <span class="pre">'DAMPING':</span> <span class="pre">8,</span> <span class="pre">'FRICTION':</span> <span class="pre">1,</span> <span class="pre">'INERTIAOR':</span> <span class="pre">4,</span> <span class="pre">'INERTIAPOS':</span> <span class="pre">3,</span> <span class="pre">'INTERTIADIAGONAL':</span> <span class="pre">2,</span> <span class="pre">'MARGIN':</span> <span class="pre">11,</span> <span class="pre">'MASS':</span> <span class="pre">0,</span> <span class="pre">'RESTITUTION':</span> <span class="pre">5,</span> <span class="pre">'ROLLINGFRICTION':</span> <span class="pre">6,</span> <span class="pre">'SPINNINGFRICTION':</span> <span class="pre">7,</span> <span class="pre">'STIFFNESS':</span> <span class="pre">9}</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.dynamicsInfo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.is_alive">
+<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Client.is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.is_alive" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether the engine is still running</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True when running</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.jointInfo">
+<span class="sig-name descname"><span class="pre">jointInfo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'AXIS':</span> <span class="pre">13,</span> <span class="pre">'DAMPING':</span> <span class="pre">6,</span> <span class="pre">'FLAGS':</span> <span class="pre">5,</span> <span class="pre">'FRICTION':</span> <span class="pre">7,</span> <span class="pre">'INDEX':</span> <span class="pre">0,</span> <span class="pre">'LINKNAME':</span> <span class="pre">12,</span> <span class="pre">'LOWERLIMIT':</span> <span class="pre">8,</span> <span class="pre">'MAXFORCE':</span> <span class="pre">10,</span> <span class="pre">'MAXVELOCITY':</span> <span class="pre">11,</span> <span class="pre">'NAME':</span> <span class="pre">1,</span> <span class="pre">'PARENTINDEX':</span> <span class="pre">16,</span> <span class="pre">'PARENTORN':</span> <span class="pre">15,</span> <span class="pre">'PARENTPOS':</span> <span class="pre">14,</span> <span class="pre">'QINDEX':</span> <span class="pre">3,</span> <span class="pre">'TYPE':</span> <span class="pre">2,</span> <span class="pre">'UINDEX':</span> <span class="pre">4,</span> <span class="pre">'UPPERLIMIT':</span> <span class="pre">9}</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.jointInfo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.jointStates">
+<span class="sig-name descname"><span class="pre">jointStates</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'FORCES':</span> <span class="pre">2,</span> <span class="pre">'POSITION':</span> <span class="pre">0,</span> <span class="pre">'TORQUE':</span> <span class="pre">3,</span> <span class="pre">'VELOCITY':</span> <span class="pre">1}</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.jointStates" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.linkInfo">
+<span class="sig-name descname"><span class="pre">linkInfo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'ANGVEL':</span> <span class="pre">7,</span> <span class="pre">'INERTIAORI':</span> <span class="pre">3,</span> <span class="pre">'INERTIAPOS':</span> <span class="pre">2,</span> <span class="pre">'LINVEL':</span> <span class="pre">6,</span> <span class="pre">'URDFORI':</span> <span class="pre">5,</span> <span class="pre">'URDFPOS':</span> <span class="pre">4,</span> <span class="pre">'WORLDORI':</span> <span class="pre">1,</span> <span class="pre">'WORLDPOS':</span> <span class="pre">0}</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.linkInfo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.load_objects">
+<span class="sig-name descname"><span class="pre">load_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Client.load_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.load_objects" title="Permalink to this definition"></a></dt>
+<dd><p>Load graspable objects. With possibility of convex decomposition with V-HACD</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em><em>, </em><em>default=&quot;&quot;</em>) – path to the mesh</p></li>
+<li><p><strong>init_position</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>, </em><em>0</em><em>, </em><em>0</em><em>]</em>) – initial position of the object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.lower_the_plane">
+<span class="sig-name descname"><span class="pre">lower_the_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Client.lower_the_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.lower_the_plane" title="Permalink to this definition"></a></dt>
+<dd><p>Moves the support plane joint to the requested position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>float</em>) – desired prismatic joint position of the plane</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 when target is reached, -1 when timeout is reached</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.read_info">
+<span class="sig-name descname"><span class="pre">read_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Client.read_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.read_info" title="Permalink to this definition"></a></dt>
+<dd><p>Add mesh to the visualizer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj_id</strong> (<em>int</em>) – id of the object; given by pybullet</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 for success</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Client.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Function to reset simulation to default state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.step_simulation">
+<span class="sig-name descname"><span class="pre">step_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sleep_duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Client.step_simulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.step_simulation" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sleep_duration</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default=None</em>) – duration to sleep before the next simulation step</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Client.visualShapeData">
+<span class="sig-name descname"><span class="pre">visualShapeData</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'COLOR':</span> <span class="pre">7,</span> <span class="pre">'DIMS':</span> <span class="pre">3,</span> <span class="pre">'FILE':</span> <span class="pre">4,</span> <span class="pre">'GEOMTYPE':</span> <span class="pre">2,</span> <span class="pre">'ID':</span> <span class="pre">0,</span> <span class="pre">'LINK':</span> <span class="pre">1,</span> <span class="pre">'ORI':</span> <span class="pre">6,</span> <span class="pre">'POS':</span> <span class="pre">5,</span> <span class="pre">'TEXTURE':</span> <span class="pre">8}</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Client.visualShapeData" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.GraspableBody">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.bullet_classes.</span></span><span class="sig-name descname"><span class="pre">GraspableBody</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client" title="pybullet_grasper.bullet_classes.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#GraspableBody"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.GraspableBody" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Stores geometry, sampling and runtime metadata for one graspable object.</p>
+<p>Initializes an empty graspable object container.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> (<a class="reference internal" href="#pybullet_grasper.bullet_classes.Client" title="pybullet_grasper.bullet_classes.Client"><em>Client</em></a>) – active physics client</p></li>
+<li><p><strong>init_position</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em>) – initial translation used when loading the object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.GraspableBody.prepare_body">
+<span class="sig-name descname"><span class="pre">prepare_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#GraspableBody.prepare_body"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.GraspableBody.prepare_body" title="Permalink to this definition"></a></dt>
+<dd><p>Load graspable objects. With possibility of convex decomposition with V-HACD</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>str</em>) – path to the .obj file</p></li>
+<li><p><strong>do_init</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=True</em>) – whether to regenerate VHACD/URDF assets before loading</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.GraspableBody.prepare_mesh">
+<span class="sig-name descname"><span class="pre">prepare_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#GraspableBody.prepare_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.GraspableBody.prepare_mesh" title="Permalink to this definition"></a></dt>
+<dd><p>Prepares information about the object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>str</em>) – path to the .obj file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pybullet_grasper.bullet_classes.</span></span><span class="sig-name descname"><span class="pre">Robotiq_2f_85</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pybullet_grasper.bullet_classes.Client" title="pybullet_grasper.bullet_classes.Client"><span class="pre">Client</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Runtime controller for the Robotiq 2F-85 gripper loaded in pyBullet.</p>
+<p>Class for the Robotiq 2f-85 gripper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> (<a class="reference internal" href="#pybullet_grasper.bullet_classes.Client" title="pybullet_grasper.bullet_classes.Client"><em>Client</em></a>) – instance of Client, holding info about the scene</p></li>
+<li><p><strong>position</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>, </em><em>0</em><em>, </em><em>1</em><em>]</em>) – spawn position of the gripper base in world frame</p></li>
+<li><p><strong>orientation</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em>, </em><em>optional</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>, </em><em>0</em><em>, </em><em>0</em><em>, </em><em>1</em><em>]</em>) – spawn orientation quaternion of the gripper base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.JOINTS">
+<span class="sig-name descname"><span class="pre">JOINTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['left_inner_knuckle_joint',</span> <span class="pre">'left_inner_finger_joint',</span> <span class="pre">'right_outer_knuckle_joint',</span> <span class="pre">'right_inner_knuckle_joint',</span> <span class="pre">'right_inner_finger_joint']</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.JOINTS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.SIGNS">
+<span class="sig-name descname"><span class="pre">SIGNS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[1,</span> <span class="pre">-1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">-1,</span> <span class="pre">1,</span> <span class="pre">-1]</span></em><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.SIGNS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.load_gripper">
+<span class="sig-name descname"><span class="pre">load_gripper</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85.load_gripper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.load_gripper" title="Permalink to this definition"></a></dt>
+<dd><p>Loads the grippers URDF into the scene</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>body id of the loaded gripper</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.motion_done">
+<span class="sig-name descname"><span class="pre">motion_done</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'force'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contact_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85.motion_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.motion_done" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether gripper is in goal position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eps</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default=1e-2</em>) – tolerance around the commanded joint value</p></li>
+<li><p><strong>object_id</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default=-1</em>) – kept for API compatibility with other detectors</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em><em>, </em><em>default=&quot;force&quot;</em>) – kept for API compatibility with other detectors</p></li>
+<li><p><strong>contact_threshold</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default=10</em>) – torque threshold used to classify object contact</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1 for normal closure, 2 for collision, 3 for timeout, 0 for no closure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85.move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.move" title="Permalink to this definition"></a></dt>
+<dd><p>Move joint to target position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>joint</strong> (<em>int</em>) – id of the joint</p></li>
+<li><p><strong>target</strong> (<em>float</em>) – target position</p></li>
+<li><p><strong>velocity</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default=0.1</em>) – maximum joint speed during the move command</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 when target is reached, -1 when timeout is reached</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.prepare_gripper">
+<span class="sig-name descname"><span class="pre">prepare_gripper</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85.prepare_gripper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.prepare_gripper" title="Permalink to this definition"></a></dt>
+<dd><p>Sets constraints for joints to works as mimic joint in URDF</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>created constraints, driver joint id, and driver joint info tuple</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[list, int, tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_constraints">
+<span class="sig-name descname"><span class="pre">reset_constraints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85.reset_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_constraints" title="Permalink to this definition"></a></dt>
+<dd><p>Remove all constraints</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_joints">
+<span class="sig-name descname"><span class="pre">reset_joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85.reset_joints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.reset_joints" title="Permalink to this definition"></a></dt>
+<dd><p>Reset gripper joints to default</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.set_gripper_pose">
+<span class="sig-name descname"><span class="pre">set_gripper_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85.set_gripper_pose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.set_gripper_pose" title="Permalink to this definition"></a></dt>
+<dd><p>Set goal position of gripper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position</strong> (<em>float</em>) – position of the gripper, 0 - closed, 1-open</p></li>
+<li><p><strong>wait</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – whether to wait for the motion to finish</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>motion result code, or 0 when command is issued without waiting</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pybullet_grasper.bullet_classes.Robotiq_2f_85.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="https://rustlluk.github.io/pybullet_grasper/documentation/_modules/pybullet_grasper/bullet_classes.html#Robotiq_2f_85.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pybullet_grasper.bullet_classes.Robotiq_2f_85.stop" title="Permalink to this definition"></a></dt>
+<dd><p>Holds the current finger joint position using position control.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Grasping with PyBullet" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grasp.html" class="btn btn-neutral float-right" title="grasp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Lukas Rustler.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
