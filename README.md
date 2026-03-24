@@ -2,7 +2,7 @@
 This package provides an interface for grasp planning using PyBullet. It includes a grasp planner that can 
 generate grasp candidates for a given object.
 
-![img](https://rustlluk.github.io/pybullet_grasper/documentation/_images/img.png)
+![img](https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/heads/main/docs/documentation/_images/img.png)
 
 ## Installation
 ### Pure Python
@@ -16,7 +16,7 @@ generate grasp candidates for a given object.
      - should be as `catkin_ws/src/pybullet_grasper`
        - this includes setup.py, src, objects, etc. 
      - `catkin_build` it
- - See the branch [ShapeGrasp repo](https://github.com/rustlluk/ShapeGrasp) for Dockerfile and Docker installation instructions
+ - See the repo of [ShapeGrasp repo](https://github.com/rustlluk/ShapeGrasp) for Dockerfile and Docker installation instructions
 
 ## Usage
 ### Pure Python
@@ -150,7 +150,7 @@ See licences of the used libraries like PyBullet, Open3D, etc. for more details.
 ## Citing
 When used, please cite this repository as follows:
 ```
-@inproceedings{rustler2026ShapeGrasp,
+@inproceedings{},
       title={},
       author={},
       year={2026},
