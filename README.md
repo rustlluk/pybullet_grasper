@@ -150,10 +150,13 @@ See licences of the used libraries like PyBullet, Open3D, etc. for more details.
 ## Citing
 When used, please cite this repository as follows:
 ```
-@inproceedings{},
-      title={},
-      author={},
+@misc{rustler2026shapegraspsimultaneousvisuohapticshape,
+      title={ShapeGrasp: Simultaneous Visuo-Haptic Shape Completion and Grasping for Improved Robot Manipulation}, 
+      author={Lukas Rustler and Matej Hoffmann},
       year={2026},
-      booktitle={},
-      organization={}}
+      eprint={2605.02347},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2605.02347}, 
+}
 ```
