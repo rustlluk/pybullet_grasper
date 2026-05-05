@@ -37,7 +37,7 @@ else:
         install_requires = f.read().splitlines()
 
     # URL of the README.md file (for example, from GitHub or any other location)
-    url = "https://raw.githubusercontent.com/rustlluk/ShapeGrasp/refs/heads/pybullet_grasper/README.md"
+    url = "https://raw.githubusercontent.com/rustlluk/pybullet_grasper/refs/heads/main/README.md"
 
     # Fetch the README content from the URL
     try:
@@ -50,7 +50,7 @@ else:
 
     setup(
         name=app_name,
-        version="0.0.1",
+        version="0.0.2",
         description="Grasping using PyBullet",
 
         # Tell setuptools where the Python code lives
@@ -63,7 +63,7 @@ else:
         install_requires=install_requires,
         author="Lukas Rustler",
         author_email="lukas.rustler@fel.cvut.cz",
-        url="https://www.lukasrustler.cz/shapegrasp",
+        url="https://www.lukasrustler.cz/ShapeGrasp",
         license="Creative Commons Attribution 4.0 International (CC BY 4.0)",
         long_description=long_description,
         long_description_content_type="text/markdown",
